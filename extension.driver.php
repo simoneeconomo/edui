@@ -3,7 +3,7 @@
 	Class extension_edui extends Extension {
 		public function about() {
 			return array(
-				'name'			=> 'Events, Datasources & Utilities Index',
+				'name'			=> 'Events, Datasources & Utilities Indexes',
 				'version'		=> '0.1',
 				'release-date'	=> '2010-08-15',
 				'author' => array('name' => 'Simone Economo',
