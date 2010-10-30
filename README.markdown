@@ -1,4 +1,4 @@
-# Click-to-import
+# Events, Datasources & Utilities Indexes
 
 Dinstinct index pages for events, datasources and utilities
 
