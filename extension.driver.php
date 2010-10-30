@@ -5,11 +5,11 @@
 			return array(
 				'name'			=> 'Events, Datasources & Utilities Indexes',
 				'version'		=> '0.1',
-				'release-date'	=> '2010-08-15',
+				'release-date'	=> '2010-10-30',
 				'author' => array('name' => 'Simone Economo',
 					'website' => 'http://www.lineheight.net',
 					'email' => 'my.ekoes@gmail.com'),
-				'description'	=> 'Adds separates index pages for events, datasources and utilities.'
+				'description'	=> 'Dinstinct index pages for events, datasources and utilities.'
 	 		);
 		}
 		
