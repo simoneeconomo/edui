@@ -9,7 +9,7 @@ Dinstinct index pages for events, datasources and utilities
 
 ## Installation
 
-_Note_: The latest version can alway be grabbed with `git clone git://github.com/eKoeS/click-to-import.git`
+_Note_: The latest version can alway be grabbed with `git clone git://github.com/eKoeS/edui.git`
 
 1. Upload the `edui` folder in this archive to your Symphony `extensions` folder.
 2. Enable it by selecting the "Events, Datasources & Utilities Indexes", choose _Enable_ from the _with-selected_ menu, then click _Apply_.
