@@ -65,7 +65,7 @@
 					} else {
 						$name = Widget::TableData($e['name']);
 
-						$section = Widget::TableData(__('Unknown'));
+						$section = Widget::TableData(__('None'));
 					}
 
 					$query = 'SELECT `id`, `title`, `events` FROM tbl_pages WHERE `events` REGEXP "' . $e['handle'] . '"';
