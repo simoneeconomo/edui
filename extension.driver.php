@@ -75,7 +75,8 @@
 
 			if ($callback['driver'] == 'blueprintscomponents') {
 				foreach ($links as $key => $value) {
-					if (Mutex::release($key, CACHE)) {
+					if (file_exists(CACHE . '/' . md5($key) . '.lock')) {
+						Mutex::release($key, CACHE);
 						redirect(URL . '/symphony/' . $value);
 					}
 				}
@@ -109,7 +110,7 @@
 						$actions = $child->getChildren();
 
 						foreach($actions as &$a) {
-							if ($a->getValue() == 'Delete') {
+							if ($a->getValue() == __('Delete')) {
 								$a->setAttribute('name', 'action[delete_custom]');
 							}
 						}
