@@ -1,48 +1,107 @@
 <?php
 
 	require_once(TOOLKIT . '/class.administrationpage.php');
-	require_once(TOOLKIT . '/class.eventmanager.php');	
 	require_once(TOOLKIT . '/class.sectionmanager.php');
-	
+	require_once(EXTENSIONS . '/edui/lib/class.eventmanageradvanced.php');
+
 	class contentExtensionEduiEvents extends AdministrationPage {
 		public $_errors;
-		
+
 		public function __construct(&$parent){
 			parent::__construct($parent);
 		}
-		
+
 		public function __viewIndex(){
-			$this->setPageType('table');	
+			$this->setPageType('table');
+
 			$this->setTitle(__('%1$s &ndash; %2$s', array(__('Symphony'), __('Events'))));
-			$this->appendSubheading(__('Events'), Widget::Anchor(__('Create New'), URL . '/symphony/blueprints/events/new/', __('Create a new event'), 'create button'));
 
-			$eventsManager = new EventManager($this->_Parent);
-			$events = $eventsManager->listAll();
+			$this->appendSubheading(
+				__('Events'),
+				Widget::Anchor(__('Create New'), URL . '/symphony/blueprints/events/new/', __('Create a new event'), 'create button')
+			);
 
+			$eventManager = new EventManagerAdvanced($this->_Parent);
 			$sectionManager = new SectionManager($this->_Parent);
 
-			$aTableHead = array(
-
-				array(__('Name'), 'col'),
-				array(__('Source'), 'col'),
-				array(__('Pages'), 'col'),
-				array(__('Authors'), 'col')
+			$columns = array(
+				array(
+					'label' => __('Name'),
+					'sortable' => true
+				),
+				array(
+					'label' => __('Source'),
+					'sortable' => true
+				),
+				array(
+					'label' => __('Pages'),
+					'sortable' => false
+				),
+				array(
+					'label' => __('Author'),
+					'sortable' => true
+				)
 			);
+
+			if (isset($_REQUEST['sort']) && is_numeric($_REQUEST['sort'])) {
+				$sort = intval($_REQUEST['sort']);
+				$order = ($_REQUEST['order'] == 'desc' ? 'desc' : 'asc');
+			}
+			else {
+				$sort = 0;
+				$order = 'desc';
+			}
+
+			if ($sort == 1) {
+				$events = $eventManager->sortBySource($order);
+			}
+			else if ($sort == 3) {
+				$events = $eventManager->sortByAuthor($order);
+			}
+			else {
+				$events = $eventManager->sortByName($order);
+			}
+
+			$aTableHead = array();
+
+			foreach($columns as $i => $c) {
+				if ($c['sortable']) {
+
+					if ($i == $sort) {
+						$link = '?sort='.$i.'&amp;order='. ($order == 'desc' ? 'asc' : 'desc');
+						$label = Widget::Anchor(
+							$c['label'], $link,
+							__('Sort by %1$s %2$s', array(($order == 'desc' ? __('ascending') : __('descending')), strtolower($c['label']))),
+							'active'
+						);
+					}
+					else {
+						$link = '?sort='.$i.'&amp;order=asc';
+						$label = Widget::Anchor(
+							$c['label'], $link,
+							__('Sort by %1$s %2$s', array(__('ascending'), strtolower($c['label'])))
+						);
+					}
+
+				}
+				else {
+					$label = $c['label'];
+				}
+
+				$aTableHead[] = array($label, 'col');
+			}
 
 			$aTableBody = array();
 
-			if(!is_array($events) || empty($events)){
-
+			if (!is_array($events) || empty($events)) {
 				$aTableBody = array(
 					Widget::TableRow(array(Widget::TableData(__('None found.'), 'inactive', NULL, count($aTableHead))), 'odd')
 				);
 			}
-
 			else{
-				
 				$bOdd = true;
 
-				foreach($events as $e){
+				foreach($events as $e) {
 
 					if ($e['can_parse']) {
 						$name = Widget::TableData(
@@ -62,9 +121,9 @@
 								$sectionData->_data['handle']
 							)
 						);
-					} else {
+					}
+					else {
 						$name = Widget::TableData($e['name']);
-
 						$section = Widget::TableData(__('None'));
 					}
 
@@ -74,24 +133,27 @@
 
 					foreach($pages as $key => $page) {
 						$events = explode(',', $page['events']);
+
 						// Avoid false positives. Ideally should be done in the REGEXP above?
 						if (in_array($e['handle'], $events)) {
-							$pagelinks[] = Widget::Anchor($page['title'], URL . '/symphony/blueprints/pages/edit/' . $page['id'])->generate() . (count($pages) > ($key + 1) ? ((($key + 1) % 6) == 0 ? '<br />' : ', ') : '');
+							$pagelinks[] = Widget::Anchor(
+								$page['title'],
+								URL . '/symphony/blueprints/pages/edit/' . $page['id']
+							)->generate() . (count($pages) > ($key + 1) ? ((($key + 1) % 6) == 0 ? '<br />' : ', ') : '');
 						}
 					}
-					$pagelinks = Widget::TableData(implode('', $pagelinks));
 
+					$pagelinks = Widget::TableData(implode('', $pagelinks));
 					$author = $e['author']['name'];
 
 					if (isset($e['author']['website'])) {
 						$author = Widget::Anchor($e['author']['name'], General::validateURL($e['author']['website']));
-
-					} else if(isset($e['author']['email'])) {
+					}
+					else if(isset($e['author']['email'])) {
 						$author = Widget::Anchor($e['author']['name'], 'mailto:' . $e['author']['email']);
 					}
 
 					$author = Widget::TableData($author);
-
 					$author->appendChild(Widget::Input('items[' . $e['handle'] . ']', null, 'checkbox'));
 
 					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $author), null);
@@ -100,10 +162,10 @@
 			}
 
 			$table = Widget::Table(
-								Widget::TableHead($aTableHead), 
-								NULL, 
-								Widget::TableBody($aTableBody)
-						);
+				Widget::TableHead($aTableHead), 
+				NULL, 
+				Widget::TableBody($aTableBody)
+			);
 
 			$this->Form->appendChild($table);
 			
@@ -122,14 +184,15 @@
 		}
 
 		public function __actionIndex(){
-
 			$checked = @array_keys($_POST['items']);
 
-			if(is_array($checked) && !empty($checked)){
+			if (is_array($checked) && !empty($checked)) {
+
 				switch($_POST['with-selected']) {
 
 					case 'delete':
 						$canProceed = true;
+
 						foreach($checked as $name) {
 							if (!General::deleteFile(EVENTS . '/event.' . $name . '.php')) {
 								$this->pageAlert(__('Failed to delete <code>%s</code>. Please check permissions.', array($name)),Alert::ERROR);
@@ -139,7 +202,9 @@
 
 						if ($canProceed) redirect($this->_Parent->getCurrentPageURL());
 						break;
+
 				}
+
 			}
 
 		}

@@ -2,9 +2,9 @@
 
 Dinstinct index pages for events, datasources and utilities
 
-- Version: 0.2
+- Version: 0.3
 - Author: Simone Economo, my.ekoes@gmail.com
-- Build Date: 10th Dec 2010
+- Build Date: 11th Dec 2010
 - Requirements: Symphony CMS 2.1.0+
 
 ## Installation
