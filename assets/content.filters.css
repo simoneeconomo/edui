@@ -1,0 +1,190 @@
+.filters {
+	overflow: hidden;
+	clear: both;
+	background: #353530 url(../../../symphony/assets/images/navigation.png) repeat-x 0px -95px;
+	margin: 1.5em 0 1.75em 0;
+	padding: 1em 19px;
+	vertical-align: middle;
+	border-top: 1px solid #e6e6e5;
+	border-bottom: 1px solid #e6e6e5;
+}
+
+.filters h3 {
+	font: 127.28%/2 'Lucida Grande', Leelawadee, Tahoma, Verdana, sans-serif;
+/*	text-transform: uppercase;*/
+	color: #f2f2f2;
+	text-shadow: #2B2B27 -1px 2px 2px;
+}
+
+.filters .filter {
+	width: 510px;
+/*	padding: 0 2px;*/
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	background: -webkit-gradient(
+		linear,
+		left bottom,
+		left top,
+		color-stop(0.02, rgb(222, 222, 222)),
+		color-stop(0.51, rgb(245, 245, 245))
+	);
+	background: -moz-linear-gradient(
+		center bottom,
+		rgb(222, 222, 222) 2%,
+		rgb(245, 245, 245) 51%
+	);
+	margin-bottom: 1.2em;
+	-webkit-box-shadow: 1px 0 8px #2E2E2A, 1px 1px 8px #2E2E2A, 0 1px 8px #2E2E2A;
+	-moz-box-shadow: 1px 0 8px #2E2E2A, 1px 1px 8px #2E2E2A, 0 1px 8px #2E2E2A;
+}
+
+.selectbox {
+	float: left;
+	margin: 2px 0 0 1px;
+	position: relative;
+	font: 11px/normal 'Lucida Grande', Meiryo, Tahoma, Verdana, sans-serif;
+	border-left: 1px solid #CACACA;
+}
+
+.selectbox:focus {
+	text-decoration: underline;
+/*	outline: 0;*/
+}
+
+.selectbox:first-child {
+	border: none;
+	margin-left: 0;
+}
+
+.selectbox .display {
+	display:block;
+/*	background: #fff;*/
+/*	border: 1px solid #abadb3;*/
+/*	-webkit-border-radius: 3px;*/
+/*	-moz-border-radius: 3px;*/
+/*	border-radius: 3px;*/
+	color: #554;
+	height: 23px;
+	line-height: 26px;
+	margin: 0;
+	padding: 0 24px 0 10px;
+	position: relative;
+	text-decoration:none;
+}
+
+.selectbox .display .arrow_btn {
+	position: absolute;
+	top: 2px; right: 0; bottom: 0;
+	width: 20px;
+	background: transparent url(images/arrow.png) no-repeat center center;
+}
+
+.selectbox .display:focus {
+	outline: none;
+}
+
+.selectbox .value{display:none;}
+
+.items {
+	background: #fff;
+	border: 1px solid #828790;
+	display: block;
+	list-style-type: none;
+	margin: 0;
+	overflow: auto;
+/*	padding: 0 0 1px 0;*/
+	z-index: 99999;
+	moz-box-shadow: 0 3px 5px rgba(0,0,0,.5);
+	webkit-box-shadow: 0 3px 5px rgba(0,0,0,.5);
+	-webkit-border-radius: 0 0 3px 3px;
+	-moz-border-radius: 0 0 3px 3px;
+	max-width: 100%;
+}
+
+.items li {
+display:block;margin:0;padding:0;/*white-space:nowrap; maybe necessary if using fixedWidth: false */
+}
+.items li:first-child{
+	margin-top:0;
+}
+.items li>a{
+	color:#000;cursor:default;display:block;padding:1px 3px;text-decoration:none;
+}
+.items li.hover>a{background-color:#6F97BE;color:#fcfcfc;}
+.items .value{display:none;}
+
+.items li.selected a {
+	color: #fcfcfc;
+}
+
+
+.filters .filter .selectbox {
+/*	height: 22px;*/
+
+}
+
+.filters .filter input {
+	height: 22px;
+	width: 310px;
+	margin: 2px 0 2px 3px;
+	padding: 0 5px;
+	border: 1px solid #CACACA;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+
+	line-height: 22px;
+}
+
+.filters .filter input:focus {
+	border: 1px solid #666;
+	outline: none;
+}
+
+.filters .default input {
+	width: 336px;
+}
+
+.filters select, .filters input {
+	margin-right: 4px;
+}
+
+.filters input.button {
+	background: #887;
+	border: none;
+	width: auto;
+	-webkit-border-radius: 1em 1em;
+	-moz-border-radius: 1em 1em;
+	border-radius: 1em 1em;
+	color: #f2f2f2;
+	font-size: 1em;
+	height: 1.8em;
+	line-height: 1.8em;
+	padding: 0px 1em 0.2em;
+}
+
+.filters .button:hover {
+	background-color: #a1a18c;
+	cursor: pointer;
+}
+
+.filters .filter input.button {
+	float: right;
+	width: 17px;
+	height: 16px;
+	margin: 5px 6px 0 0;
+	padding: 0;
+	position: relative;
+	top: 1px;
+	text-indent: -999px;
+	background: transparent url(images/delete.png) 0 0 no-repeat;
+}
+
+.filters .filter .button:hover {
+	background: transparent url(images/delete.png) 0 -16px no-repeat;
+}
+
+.filters input.apply {
+	margin: 0.8em 0;
+}

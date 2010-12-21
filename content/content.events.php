@@ -21,8 +21,129 @@
 				Widget::Anchor(__('Create New'), URL . '/symphony/blueprints/events/new/', __('Create a new event'), 'create button')
 			);
 
+			$this->addStylesheetToHead(URL . '/extensions/edui/assets/content.filters.css', 'screen', 80);
+			$this->addScriptToHead(URL . '/extensions/edui/assets/jquery.sb.min.js', 80);
+			$this->addScriptToHead(URL . '/extensions/edui/assets/content.filters.js', 80);
+
 			$eventManager = new EventManagerAdvanced($this->_Parent);
 			$sectionManager = new SectionManager($this->_Parent);
+
+			$events = $eventManager->listAll();
+
+			/* Filtering */
+
+			$filters_panel = new XMLElement('div', null, array('class' => 'filters'));
+			$filters_panel->appendChild(new XMLElement('h3', __('Filters')));
+
+			$filters_count = 0;
+
+			if(isset($_REQUEST['filter'])){
+				$filters = explode(';', $_REQUEST['filter']);
+
+				foreach($filters as $f) {
+					if ($f == '') continue;
+
+					list($key, $value) = explode(':', $f);
+
+					$mode = ($key{strlen($key)-1} == "*")
+						? EventManagerAdvanced::FILTER_CONTAINS
+						: EventManagerAdvanced::FILTER_IS;
+
+					$key = ($key{strlen($key)-1} == "*") ? substr($key, 0, strlen($key)-1) : $key;
+					$value = rawurldecode($value);
+
+					$filter_box = new XMLElement('div', null, array('class' => 'filter'));
+
+					$filter_keys = array(
+						array('name', false, __('Name')),
+						array('source', false, __('Source')),
+						array('pages', false, __('Pages')),
+						array('author', false, __('Author')),
+					);
+
+					$filter_modes = array(
+						array('0', ($mode == EventManagerAdvanced::FILTER_IS),       __('is')),
+						array('1', ($mode == EventManagerAdvanced::FILTER_CONTAINS), __('contains')),
+					);
+
+					switch($key) {
+						case 'name':
+							$events = $eventManager->filterByName($value, $mode, $events);
+
+							$filter_keys[0][1] = true;
+							break;
+						case 'source':
+							$events = $eventManager->filterBySource($value, $mode, $events);
+
+							$filter_keys[1][1] = true;
+							break;
+						case 'pages':
+							$events = $eventManager->filterByPages($value, $mode, $events);
+
+							$filter_keys[2][1] = true;
+							break;
+						case 'author':
+							$events = $eventManager->filterByAuthor($value, $mode, $events);
+
+							$filter_keys[3][1] = true;
+							break;
+					}
+
+					$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys));
+					$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
+					$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count, $value));
+					$filter_box->appendChild(Widget::Input('action[filter-skip-' . $filters_count .']', __('Remove filter'), 'submit', array('class' => 'button delete')));
+
+					$filters_panel->appendChild($filter_box);
+					++$filters_count;
+				}
+
+			}
+
+			$filter_box = new XMLElement('div', null, array('class' => 'filter default'));
+
+			$filter_keys = array(
+				array('name', false, __('Name')),
+				array('source', false, __('Source')),
+				array('pages', false, __('Pages')),
+				array('author', false, __('Author')),
+			);
+
+			$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys));
+
+			$filter_modes = array(
+				array('0', false, __('is')),
+				array('1', false, __('contains')),
+			);
+
+			$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
+
+			$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count));
+
+			$filters_panel->appendChild($filter_box);
+			$filters_panel->appendChild(Widget::Input('action[process-filters]', __('Apply'), 'submit', array('class' => 'button apply')));;
+
+			$this->Form->appendChild($filters_panel);
+
+			/* Sorting */
+
+			if (isset($_REQUEST['sort']) && is_numeric($_REQUEST['sort'])) {
+				$sort = intval($_REQUEST['sort']);
+				$order = ($_REQUEST['order'] == 'desc' ? 'desc' : 'asc');
+			}
+			else {
+				$sort = 0;
+				$order = 'desc';
+			}
+
+			if ($sort == 1)
+				$events = $eventManager->sortBySource($order, $events);
+			else if ($sort == 3)
+				$events = $eventManager->sortByAuthor($order, $events);
+			else
+				$events = $eventManager->sortByName($order, $events);
+
+			/* Columns */
 
 			$columns = array(
 				array(
@@ -53,13 +174,13 @@
 			}
 
 			if ($sort == 1) {
-				$events = $eventManager->sortBySource($order);
+				$events = $eventManager->sortBySource($order, $events);
 			}
 			else if ($sort == 3) {
-				$events = $eventManager->sortByAuthor($order);
+				$events = $eventManager->sortByAuthor($order, $events);
 			}
 			else {
-				$events = $eventManager->sortByName($order);
+				$events = $eventManager->sortByName($order, $events);
 			}
 
 			$aTableHead = array();
@@ -90,6 +211,8 @@
 
 				$aTableHead[] = array($label, 'col');
 			}
+
+			/* Body */
 
 			$aTableBody = array();
 
@@ -127,20 +250,16 @@
 						$section = Widget::TableData(__('None'));
 					}
 
-					$query = 'SELECT `id`, `title`, `events` FROM tbl_pages WHERE `events` REGEXP "' . $e['handle'] . '"';
-					$pages = $this->_Parent->Database->fetch($query);
+					$pages = $eventManager->getLinkedPages($e['handle']);
 					$pagelinks = array();
 
-					foreach($pages as $key => $page) {
-						$events = explode(',', $page['events']);
-
-						// Avoid false positives. Ideally should be done in the REGEXP above?
-						if (in_array($e['handle'], $events)) {
-							$pagelinks[] = Widget::Anchor(
-								$page['title'],
-								URL . '/symphony/blueprints/pages/edit/' . $page['id']
-							)->generate() . (count($pages) > ($key + 1) ? ((($key + 1) % 6) == 0 ? '<br />' : ', ') : '');
-						}
+					$i = 0;
+					foreach($pages as $key => $value) {
+						++$i;
+						$pagelinks[] = Widget::Anchor(
+							$value,
+							URL . '/symphony/blueprints/pages/edit/' . $key
+						)->generate() . (count($pages) > $i ? (($i % 6) == 0 ? '<br />' : ', ') : '');
 					}
 
 					$pagelinks = Widget::TableData(implode('', $pagelinks));
@@ -168,10 +287,12 @@
 			);
 
 			$this->Form->appendChild($table);
-			
+
+			/* Actions */
+
 			$tableActions = new XMLElement('div');
 			$tableActions->setAttribute('class', 'actions');
-			
+
 			$options = array(
 				array(NULL, false, __('With Selected...')),
 				array('delete', false, __('Delete'), 'confirm'),
@@ -184,29 +305,65 @@
 		}
 
 		public function __actionIndex(){
-			$checked = @array_keys($_POST['items']);
+			if (isset($_POST['action']) && is_array($_POST['action'])) {
 
-			if (is_array($checked) && !empty($checked)) {
+				foreach ($_POST['action'] as $key => $action) {
+					if ($key == 'process-filters') {
+						$string = "?filter=";
 
-				switch($_POST['with-selected']) {
+						for ($i = 0; isset($_POST['filter-key-' . $i]); ++$i) {
+							if ($_POST['filter-value-' . $i] == '') continue;
 
-					case 'delete':
-						$canProceed = true;
-
-						foreach($checked as $name) {
-							if (!General::deleteFile(EVENTS . '/event.' . $name . '.php')) {
-								$this->pageAlert(__('Failed to delete <code>%s</code>. Please check permissions.', array($name)),Alert::ERROR);
-								$canProceed = false;
-							}
+							$key = $_POST['filter-key-' . $i];
+							$mode = (intval($_POST['filter-mode-' . $i]) == EventManagerAdvanced::FILTER_IS) ? ':' : '*:';
+							$value = rawurlencode($_POST['filter-value-' . $i]);
+							$string .= $key . $mode . $value .";";
 						}
 
-						if ($canProceed) redirect($this->_Parent->getCurrentPageURL());
-						break;
+						redirect($this->_Parent->getCurrentPageURL() . $string);
+					}
+					else if (strpos($key, 'filter-skip-') !== false) {
+						$filter_to_skip = str_replace('filter-skip-', '', $key);
+						$string = "?filter=";
 
+						for ($i = 0; isset($_POST['filter-key-' . $i]); ++$i) {
+							if ($i == $filter_to_skip || $_POST['filter-value-' . $i] == '') continue;
+
+							$key = $_POST['filter-key-' . $i];
+							$mode = (intval($_POST['filter-mode-' . $i]) == EventManagerAdvanced::FILTER_IS) ? ':' : '*:';
+							$value = rawurlencode($_POST['filter-value-' . $i]);
+							$string .= $key . $mode . $value .";";
+						}
+
+						redirect($this->_Parent->getCurrentPageURL() . $string);
+					}
+					else {
+						$checked = @array_keys($_POST['items']);
+
+						if (is_array($checked) && !empty($checked)) {
+
+							switch($_POST['with-selected']) {
+
+								case 'delete':
+									$canProceed = true;
+
+									foreach($checked as $name) {
+										if (!General::deleteFile(EVENTS . '/event.' . $name . '.php')) {
+											$this->pageAlert(__('Failed to delete <code>%s</code>. Please check permissions.', array($name)),Alert::ERROR);
+											$canProceed = false;
+										}
+									}
+
+									if ($canProceed) redirect($this->_Parent->getCurrentPageURL());
+									break;
+
+							}
+
+						}
+					}
 				}
 
 			}
-
 		}
 
 	}

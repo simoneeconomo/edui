@@ -15,13 +15,135 @@
 			$this->setPageType('table');
 
 			$this->setTitle(__('%1$s &ndash; %2$s', array(__('Symphony'), __('Data Sources'))));
+
 			$this->appendSubheading(
 				__('Data Sources'),
 				Widget::Anchor(__('Create New'), URL . '/symphony/blueprints/datasources/new/', __('Create a new data source'), 'create button')
 			);
 
+			$this->addStylesheetToHead(URL . '/extensions/edui/assets/content.filters.css', 'screen', 80);
+			$this->addScriptToHead(URL . '/extensions/edui/assets/jquery.sb.min.js', 80);
+			$this->addScriptToHead(URL . '/extensions/edui/assets/content.filters.js', 80);
+
 			$datasourceManager = new DatasourceManagerAdvanced($this->_Parent);
 			$sectionManager = new SectionManager($this->_Parent);
+
+			$datasources = $datasourceManager->listAll();
+
+			/* Filtering */
+
+			$filters_panel = new XMLElement('div', null, array('class' => 'filters'));
+			$filters_panel->appendChild(new XMLElement('h3', __('Filters')));
+
+			$filters_count = 0;
+
+			if(isset($_REQUEST['filter'])){
+				$filters = explode(';', $_REQUEST['filter']);
+
+				foreach($filters as $f) {
+					if ($f == '') continue;
+
+					list($key, $value) = explode(':', $f);
+
+					$mode = ($key{strlen($key)-1} == "*")
+						? DatasourceManagerAdvanced::FILTER_CONTAINS
+						: DatasourceManagerAdvanced::FILTER_IS;
+
+					$key = ($key{strlen($key)-1} == "*") ? substr($key, 0, strlen($key)-1) : $key;
+					$value = rawurldecode($value);
+
+					$filter_box = new XMLElement('div', null, array('class' => 'filter'));
+
+					$filter_keys = array(
+						array('name', false, __('Name')),
+						array('source', false, __('Source')),
+						array('pages', false, __('Pages')),
+						array('author', false, __('Author')),
+					);
+
+					$filter_modes = array(
+						array('0', ($mode == DatasourceManagerAdvanced::FILTER_IS),       __('is')),
+						array('1', ($mode == DatasourceManagerAdvanced::FILTER_CONTAINS), __('contains')),
+					);
+
+					switch($key) {
+						case 'name':
+							$datasources = $datasourceManager->filterByName($value, $mode, $datasources);
+
+							$filter_keys[0][1] = true;
+							break;
+						case 'source':
+							$datasources = $datasourceManager->filterBySource($value, $mode, $datasources);
+
+							$filter_keys[1][1] = true;
+							break;
+						case 'pages':
+							$datasources = $datasourceManager->filterByPages($value, $mode, $datasources);
+
+							$filter_keys[2][1] = true;
+							break;
+						case 'author':
+							$datasources = $datasourceManager->filterByAuthor($value, $mode, $datasources);
+
+							$filter_keys[3][1] = true;
+							break;
+					}
+
+					$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys));
+					$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
+					$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count, $value));
+					$filter_box->appendChild(Widget::Input('action[filter-skip-' . $filters_count .']', __('Remove filter'), 'submit', array('class' => 'button delete')));
+
+					$filters_panel->appendChild($filter_box);
+					++$filters_count;
+				}
+
+			}
+
+			$filter_box = new XMLElement('div', null, array('class' => 'filter default'));
+
+			$filter_keys = array(
+				array('name', false, __('Name')),
+				array('source', false, __('Source')),
+				array('pages', false, __('Pages')),
+				array('author', false, __('Author')),
+			);
+
+			$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys));
+
+			$filter_modes = array(
+				array('0', false, __('is')),
+				array('1', false, __('contains')),
+			);
+
+			$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
+
+			$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count));
+
+			$filters_panel->appendChild($filter_box);
+			$filters_panel->appendChild(Widget::Input('action[process-filters]', __('Apply'), 'submit', array('class' => 'button apply')));;
+
+			$this->Form->appendChild($filters_panel);
+
+			/* Sorting */
+
+			if (isset($_REQUEST['sort']) && is_numeric($_REQUEST['sort'])) {
+				$sort = intval($_REQUEST['sort']);
+				$order = ($_REQUEST['order'] == 'desc' ? 'desc' : 'asc');
+			}
+			else {
+				$sort = 0;
+				$order = 'desc';
+			}
+
+			if ($sort == 1)
+				$datasources = $datasourceManager->sortBySource($order, $datasources);
+			else if ($sort == 3)
+				$datasources = $datasourceManager->sortByAuthor($order, $datasources);
+			else
+				$datasources = $datasourceManager->sortByName($order, $datasources);
+
+			/* Columns */
 
 			$columns = array(
 				array(
@@ -42,32 +164,13 @@
 				)
 			);
 
-			if (isset($_REQUEST['sort']) && is_numeric($_REQUEST['sort'])) {
-				$sort = intval($_REQUEST['sort']);
-				$order = ($_REQUEST['order'] == 'desc' ? 'desc' : 'asc');
-			}
-			else {
-				$sort = 0;
-				$order = 'desc';
-			}
-
-			if ($sort == 1) {
-				$datasources = $datasourceManager->sortBySource($order);
-			}
-			else if ($sort == 3) {
-				$datasources = $datasourceManager->sortByAuthor($order);
-			}
-			else {
-				$datasources = $datasourceManager->sortByName($order);
-			}
-
 			$aTableHead = array();
 
 			foreach($columns as $i => $c) {
 				if ($c['sortable']) {
 
 					if ($i == $sort) {
-						$link = '?sort='.$i.'&amp;order='. ($order == 'desc' ? 'asc' : 'desc');
+						$link = '?sort='.$i.'&amp;order='. ($order == 'desc' ? 'asc' : 'desc') . (isset($_REQUEST['filter']) ? '&amp;filter=' . $_REQUEST['filter'] : '');
 						$label = Widget::Anchor(
 							$c['label'], $link,
 							__('Sort by %1$s %2$s', array(($order == 'desc' ? __('ascending') : __('descending')), strtolower($c['label']))),
@@ -75,7 +178,7 @@
 						);
 					}
 					else {
-						$link = '?sort='.$i.'&amp;order=asc';
+						$link = '?sort='.$i.'&amp;order=asc' . (isset($_REQUEST['filter']) ? '&amp;filter=' . $_REQUEST['filter'] : '');
 						$label = Widget::Anchor(
 							$c['label'], $link,
 							__('Sort by %1$s %2$s', array(__('ascending'), strtolower($c['label'])))
@@ -89,6 +192,8 @@
 
 				$aTableHead[] = array($label, 'col');
 			}
+
+			/* Body */
 
 			$aTableBody = array();
 
@@ -131,20 +236,16 @@
 						$section = Widget::TableData(__('Unknown'));
 					}
 
-					$query = 'SELECT `id`, `title`, `data_sources` FROM tbl_pages WHERE `data_sources` REGEXP "' . $d['handle'] . '"';
-					$pages = $this->_Parent->Database->fetch($query);
+					$pages = $datasourceManager->getLinkedPages($d['handle']);
 					$pagelinks = array();
 
-					foreach($pages as $key => $page) {
-						$datasources = explode(',', $page['data_sources']);
-
-						// Avoid false positives. Ideally should be done in the REGEXP above?
-						if (in_array($d['handle'], $datasources)) {
-							$pagelinks[] = Widget::Anchor(
-								$page['title'],
-								URL . '/symphony/blueprints/pages/edit/' . $page['id']
-							)->generate() . (count($pages) > ($key + 1) ? ((($key + 1) % 6) == 0 ? '<br />' : ', ') : '');
-						}
+					$i = 0;
+					foreach($pages as $key => $value) {
+						++$i;
+						$pagelinks[] = Widget::Anchor(
+							$value,
+							URL . '/symphony/blueprints/pages/edit/' . $key
+						)->generate() . (count($pages) > $i ? (($i % 6) == 0 ? '<br />' : ', ') : '');
 					}
 
 					$pagelinks = Widget::TableData(implode('', $pagelinks));
@@ -172,10 +273,12 @@
 			);
 
 			$this->Form->appendChild($table);
-			
+
+			/* Actions */
+
 			$tableActions = new XMLElement('div');
 			$tableActions->setAttribute('class', 'actions');
-			
+
 			$options = array(
 				array(NULL, false, __('With Selected...')),
 				array('delete', false, __('Delete'), 'confirm'),
@@ -188,29 +291,65 @@
 		}
 
 		public function __actionIndex(){
-			$checked = @array_keys($_POST['items']);
+			if (isset($_POST['action']) && is_array($_POST['action'])) {
 
-			if (is_array($checked) && !empty($checked)) {
+				foreach ($_POST['action'] as $key => $action) {
+					if ($key == 'process-filters') {
+						$string = "?filter=";
 
-				switch($_POST['with-selected']) {
+						for ($i = 0; isset($_POST['filter-key-' . $i]); ++$i) {
+							if ($_POST['filter-value-' . $i] == '') continue;
 
-					case 'delete':
-						$canProceed = true;
-
-						foreach($checked as $name) {
-							if (!General::deleteFile(DATASOURCES . '/data.' . $name . '.php')) {
-								$this->pageAlert(__('Failed to delete <code>%s</code>. Please check permissions.', array($name)),Alert::ERROR);
-								$canProceed = false;
-							}
+							$key = $_POST['filter-key-' . $i];
+							$mode = (intval($_POST['filter-mode-' . $i]) == DatasourceManagerAdvanced::FILTER_IS) ? ':' : '*:';
+							$value = rawurlencode($_POST['filter-value-' . $i]);
+							$string .= $key . $mode . $value .";";
 						}
 
-						if ($canProceed) redirect($this->_Parent->getCurrentPageURL());
-						break;
+						redirect($this->_Parent->getCurrentPageURL() . $string);
+					}
+					else if (strpos($key, 'filter-skip-') !== false) {
+						$filter_to_skip = str_replace('filter-skip-', '', $key);
+						$string = "?filter=";
 
+						for ($i = 0; isset($_POST['filter-key-' . $i]); ++$i) {
+							if ($i == $filter_to_skip || $_POST['filter-value-' . $i] == '') continue;
+
+							$key = $_POST['filter-key-' . $i];
+							$mode = (intval($_POST['filter-mode-' . $i]) == DatasourceManagerAdvanced::FILTER_IS) ? ':' : '*:';
+							$value = rawurlencode($_POST['filter-value-' . $i]);
+							$string .= $key . $mode . $value .";";
+						}
+
+						redirect($this->_Parent->getCurrentPageURL() . $string);
+					}
+					else {
+						$checked = @array_keys($_POST['items']);
+
+						if (is_array($checked) && !empty($checked)) {
+
+							switch($_POST['with-selected']) {
+
+								case 'delete':
+									$canProceed = true;
+
+									foreach($checked as $name) {
+										if (!General::deleteFile(DATASOURCES . '/data.' . $name . '.php')) {
+											$this->pageAlert(__('Failed to delete <code>%s</code>. Please check permissions.', array($name)),Alert::ERROR);
+											$canProceed = false;
+										}
+									}
+
+									if ($canProceed) redirect($this->_Parent->getCurrentPageURL());
+									break;
+
+							}
+
+						}
+					}
 				}
 
 			}
-
 		}
 
 	}

@@ -7,8 +7,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'Events, Datasources & Utilities Indexes',
-				'version'		=> '0.3',
-				'release-date'	=> '2010-12-11',
+				'version'		=> '0.4',
+				'release-date'	=> '2010-12-21',
 				'author' => array('name' => 'Simone Economo',
 					'website' => 'http://www.lineheight.net',
 					'email' => 'my.ekoes@gmail.com'),
@@ -75,8 +75,8 @@
 
 			if ($callback['driver'] == 'blueprintscomponents') {
 				foreach ($links as $key => $value) {
-					if (file_exists(CACHE . '/' . md5($key) . '.lock')) {
-						Mutex::release($key, CACHE);
+					if (file_exists(TMP . '/' . $key . '.tmp')) {
+						unlink(TMP . '/' . $key . '.tmp');
 						redirect(URL . '/symphony/' . $value);
 					}
 				}
@@ -91,7 +91,7 @@
 				}
 
 				if ($_POST['action'] && array_key_exists('delete_custom', $_POST['action'])) {
-					Mutex::acquire($callback['driver'], 30, CACHE);
+					touch(TMP . '/' . $callback['driver'] . '.tmp');
 
 					$_POST['action']['delete'] = $_POST['action']['delete_custom'];
 
