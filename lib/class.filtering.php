@@ -201,9 +201,9 @@
 							break;
 					}
 
-					$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys));
-					$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
-					$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count, $value));
+					$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys, array('class' => 'key')));
+					$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes, array('class' => 'mode')));
+					$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count, $value, "text", array('class' => 'value')));
 					$filter_box->appendChild(Widget::Input('action[filter-skip-' . $filters_count .']', __('Remove filter'), 'submit', array('class' => 'button delete')));
 
 					$filters_panel->appendChild($filter_box);
@@ -221,7 +221,7 @@
 				array('author', false, __('Author')),
 			);
 
-			$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys));
+			$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys, array('class' => 'key')));
 
 			$filter_modes = array(
 				array('0', false, __('equals')),
@@ -229,9 +229,9 @@
 				array('2', false, __('is empty')),
 			);
 
-			$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
+			$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes, array('class' => 'mode')));
 
-			$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count));
+			$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count, NULL, "text", array('class' => 'value')));
 
 			$filters_panel->appendChild($filter_box);
 			$filters_panel->appendChild(Widget::Input('action[process-filters]', __('Apply'), 'submit', array('class' => 'button apply')));;

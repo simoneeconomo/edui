@@ -17,7 +17,7 @@
 
 		$('.filters .filter select').sb();
 
-		$('.filters .filter select').change(function() {
+		$('.filters .filter select.mode:first').change(function() {
 			$(this).parents('.filter')
 				.find('input[type=text]:first')
 				.attr('disabled', $(this).val() == 2);
