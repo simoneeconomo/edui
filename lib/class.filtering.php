@@ -4,7 +4,7 @@
 
 		const FILTER_IS          = 0;
 		const FILTER_CONTAINS    = 1;
-		const FILTER_NULL        = 2;
+		const FILTER_EMPTY       = 2;
 
 		const MODE_DATASOURCES   = 100;
 		const MODE_EVENTS        = 200;
@@ -17,7 +17,7 @@
 			$this->_mode = $mode;
 		}
 
-		public static function filterByName($value, $mode = self::FILTER_IS, $data = array()) {
+		public function filterByName($value, $mode = self::FILTER_IS, $data = array()) {
 			$result = array();
 
 			if ($mode == self::FILTER_IS) {
@@ -26,7 +26,7 @@
 						$result[$d['handle']] = $d;
 				}
 			}
-			else {
+			else if ($mode == self::FILTER_CONTAINS) {
 				foreach($data as $d) {
 					if (stristr($d['name'], $value))
 						$result[$d['handle']] = $d;
@@ -36,7 +36,7 @@
 			return $result;
 		}
 
-		public static function filterByPages($value, $mode = self::FILTER_IS, $data = array()) {
+		public function filterByPages($value, $mode = self::FILTER_IS, $data = array()) {
 			$result = array();
 			$values = explode(',', $value);
 
@@ -44,11 +44,10 @@
 				$pages = $this->getLinkedPages($d['handle']);
 				$accum = true;
 
-#				if ($mode == self::FILTER_IS && $value == '' && empty($pages)) {
-#					$result[] = $d;
-#					break;
-#				}
-				if ($mode == self::FILTER_IS && count($values) != count($pages)) continue;
+				if ($mode == self::FILTER_EMPTY && $value == "" && empty($pages)) {
+					$result[] = $d;
+				}
+				else if ($mode == self::FILTER_IS && count($values) != count($pages)) continue;
 
 				foreach($values as $v) {
 					if (!$accum) break;
@@ -62,7 +61,7 @@
 			return $result;
 		}
 
-		public static function filterBySource($value, $mode = self::FILTER_IS, $data = array()) {
+		public function filterBySource($value, $mode = self::FILTER_IS, $data = array()) {
 			$result = array();
 
 			if ($mode == self::FILTER_IS) {
@@ -71,7 +70,7 @@
 						$result[$d['handle']] = $d;
 				}
 			}
-			else {
+			else if ($mode == self::FILTER_CONTAINS) {
 				foreach($data as $d) {
 					if (stristr($d['type'], $value))
 						$result[$d['handle']] = $d;
@@ -81,7 +80,7 @@
 			return $result;
 		}
 
-		public static function filterByAuthor($value, $mode = self::FILTER_IS, $data = array()) {
+		public function filterByAuthor($value, $mode = self::FILTER_IS, $data = array()) {
 			$result = array();
 
 			if ($mode == self::FILTER_IS) {
@@ -90,7 +89,7 @@
 						$result[$d['handle']] = $d;
 				}
 			}
-			else {
+			else if ($mode == self::FILTER_CONTAINS) {
 				foreach($data as $d) {
 					if (stristr($d['author']['name'], $value))
 						$result[$d['handle']] = $d;
@@ -104,7 +103,6 @@
 			if (!$handle) return array();
 
 			$field = ($this->_mode == self::MODE_DATASOURCES) ? "data_sources" : "events";
-
 			$query = 'SELECT `id`, `title`
 			          FROM tbl_pages
 			          WHERE `' . $field . '` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
@@ -133,11 +131,18 @@
 
 					list($key, $value) = explode(':', $f);
 
-					$mode = ($key{strlen($key)-1} == "*")
-						? self::FILTER_CONTAINS
-						: self::FILTER_IS;
+					if ($key{0} == "!") {
+						$key = substr($key, 1);
+						$mode = self::FILTER_EMPTY;
+					}
+					else if ($key{strlen($key)-1} == "*") {
+						$key = substr($key, 0, strlen($key)-1);
+						$mode = self::FILTER_CONTAINS;
+					}
+					else {
+						$mode = self::FILTER_IS;
+					}
 
-					$key = ($key{strlen($key)-1} == "*") ? substr($key, 0, strlen($key)-1) : $key;
 					$value = rawurldecode($value);
 
 					$filter_box = new XMLElement('div', null, array('class' => 'filter'));
@@ -152,6 +157,7 @@
 					$filter_modes = array(
 						array('0', ($mode == self::FILTER_IS),       __('is')),
 						array('1', ($mode == self::FILTER_CONTAINS), __('contains')),
+						array('2', ($mode == self::FILTER_EMPTY),    __('empty')),
 					);
 
 					switch($key) {
@@ -168,7 +174,8 @@
 							          FROM tbl_sections
 							          WHERE `id` = "' . General::sanitize($value) .'"';
 							$results = $this->_Parent->Database->fetch($query);
-							$value = $results[0]['name'];
+
+							if (!empty($results)) $value = $results[0]['name'];
 							break;
 						case 'pages':
 							$data = self::filterByPages($value, $mode, $data);
@@ -181,7 +188,8 @@
 								          FROM tbl_pages
 								          WHERE `id` = "' . General::sanitize(trim($v)) .'"';
 								$results = $this->_Parent->Database->fetch($query);
-								$v = $results[0]['title'];
+
+								if (!empty($results)) $v = $results[0]['title'];
 							}
 
 							$value = implode(',', $values);
@@ -218,6 +226,7 @@
 			$filter_modes = array(
 				array('0', false, __('is')),
 				array('1', false, __('contains')),
+				array('2', false, __('empty')),
 			);
 
 			$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
@@ -234,17 +243,32 @@
 			$string = "?filter=";
 
 			for ($i = 0; isset($_POST['filter-key-' . $i]); ++$i) {
-				if (($jump != null && $i == intval($jump)) || $_POST['filter-value-' . $i] == '') continue;
+				if ($jump != null && $i == intval($jump)) continue;
 
 				$key = $_POST['filter-key-' . $i];
-				$mode = (intval($_POST['filter-mode-' . $i]) == self::FILTER_IS) ? ':' : '*:';
+				$mode = intval($_POST['filter-mode-' . $i]);
+
+				if ($mode == self::FILTER_IS) {
+					$sep = ":";
+				}
+				else if ($mode == self::FILTER_CONTAINS) {
+					$sep = "*:";
+				}
+				else {
+					$key = "!" . $key;
+				}
+
+				$value = $_POST['filter-value-' . $i];
+
+				if ($value == "" && $mode != self::FILTER_EMPTY) continue;
 
 				if ($key == 'source') {
 					$query = 'SELECT `id`
 					          FROM tbl_sections
-					          WHERE `name` = "' . General::sanitize($_POST['filter-value-' . $i]) .'"';
+					          WHERE `name` = "' . General::sanitize($value) .'"';
 					$results = $this->_Parent->Database->fetch($query);
-					$value = $results[0]['id'];
+
+					if (!empty($results)) $value = $results[0]['id'];
 				}
 				else if ($key == 'pages') {
 					$values = explode(',', $_POST['filter-value-' . $i]);
@@ -254,19 +278,17 @@
 						          FROM tbl_pages
 						          WHERE `title` = "' . General::sanitize(trim($v)) .'"';
 						$results = $this->_Parent->Database->fetch($query);
-						$v = $results[0]['id'];
 
+						if (!empty($results))
+							$v = $results[0]['id'];
 					}
 
 					$value = implode(",", $values);
 				}
-				else {
-					$value = $_POST['filter-value-' . $i];
-				}
 
 				$value = rawurlencode($value);
 
-				$string .= $key . $mode . $value .";";
+				$string .= $key . $sep . $value .";";
 			}
 
 			return ($string == "?filter=") ? "" : $string;
