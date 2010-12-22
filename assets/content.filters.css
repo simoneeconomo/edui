@@ -45,6 +45,14 @@
 	-moz-box-shadow: 1px 0 8px #2E2E2A, 1px 1px 8px #2E2E2A, 0 1px 8px #2E2E2A;
 }
 
+.filters .filter select {
+	margin: 0 0 0 10px;
+}
+
+.filters .filter select.mode {
+	margin-right: 8px;
+}
+
 .selectbox {
 	position: relative;
 	float: left;
