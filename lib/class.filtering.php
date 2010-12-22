@@ -155,9 +155,9 @@
 					);
 
 					$filter_modes = array(
-						array('0', ($mode == self::FILTER_IS),       __('is')),
+						array('0', ($mode == self::FILTER_IS),       __('equals')),
 						array('1', ($mode == self::FILTER_CONTAINS), __('contains')),
-						array('2', ($mode == self::FILTER_EMPTY),    __('empty')),
+						array('2', ($mode == self::FILTER_EMPTY),    __('is empty')),
 					);
 
 					switch($key) {
@@ -224,9 +224,9 @@
 			$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys));
 
 			$filter_modes = array(
-				array('0', false, __('is')),
+				array('0', false, __('equals')),
 				array('1', false, __('contains')),
-				array('2', false, __('empty')),
+				array('2', false, __('is empty')),
 			);
 
 			$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
