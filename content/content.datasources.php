@@ -2,7 +2,10 @@
 
 	require_once(TOOLKIT . '/class.administrationpage.php');
 	require_once(TOOLKIT . '/class.sectionmanager.php');
-	require_once(EXTENSIONS . '/edui/lib/class.datasourcemanageradvanced.php');
+	require_once(TOOLKIT . '/class.datasourcemanager.php');
+
+	require_once(EXTENSIONS . '/edui/lib/class.sorting.php');
+	require_once(EXTENSIONS . '/edui/lib/class.filtering.php');
 
 	class contentExtensionEduiDatasources extends AdministrationPage {
 		public $_errors;
@@ -25,123 +28,19 @@
 			$this->addScriptToHead(URL . '/extensions/edui/assets/jquery.sb.min.js', 80);
 			$this->addScriptToHead(URL . '/extensions/edui/assets/content.filters.js', 80);
 
-			$datasourceManager = new DatasourceManagerAdvanced($this->_Parent);
+			$datasourceManager = new DatasourceManager($this->_Parent);
 			$sectionManager = new SectionManager($this->_Parent);
 
 			$datasources = $datasourceManager->listAll();
 
 			/* Filtering */
 
-			$filters_panel = new XMLElement('div', null, array('class' => 'filters'));
-			$filters_panel->appendChild(new XMLElement('h3', __('Filters')));
-
-			$filters_count = 0;
-
-			if(isset($_REQUEST['filter'])){
-				$filters = explode(';', $_REQUEST['filter']);
-
-				foreach($filters as $f) {
-					if ($f == '') continue;
-
-					list($key, $value) = explode(':', $f);
-
-					$mode = ($key{strlen($key)-1} == "*")
-						? DatasourceManagerAdvanced::FILTER_CONTAINS
-						: DatasourceManagerAdvanced::FILTER_IS;
-
-					$key = ($key{strlen($key)-1} == "*") ? substr($key, 0, strlen($key)-1) : $key;
-					$value = rawurldecode($value);
-
-					$filter_box = new XMLElement('div', null, array('class' => 'filter'));
-
-					$filter_keys = array(
-						array('name', false, __('Name')),
-						array('source', false, __('Source')),
-						array('pages', false, __('Pages')),
-						array('author', false, __('Author')),
-					);
-
-					$filter_modes = array(
-						array('0', ($mode == DatasourceManagerAdvanced::FILTER_IS),       __('is')),
-						array('1', ($mode == DatasourceManagerAdvanced::FILTER_CONTAINS), __('contains')),
-					);
-
-					switch($key) {
-						case 'name':
-							$datasources = $datasourceManager->filterByName($value, $mode, $datasources);
-
-							$filter_keys[0][1] = true;
-							break;
-						case 'source':
-							$datasources = $datasourceManager->filterBySource($value, $mode, $datasources);
-
-							$filter_keys[1][1] = true;
-							break;
-						case 'pages':
-							$datasources = $datasourceManager->filterByPages($value, $mode, $datasources);
-
-							$filter_keys[2][1] = true;
-							break;
-						case 'author':
-							$datasources = $datasourceManager->filterByAuthor($value, $mode, $datasources);
-
-							$filter_keys[3][1] = true;
-							break;
-					}
-
-					$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys));
-					$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
-					$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count, $value));
-					$filter_box->appendChild(Widget::Input('action[filter-skip-' . $filters_count .']', __('Remove filter'), 'submit', array('class' => 'button delete')));
-
-					$filters_panel->appendChild($filter_box);
-					++$filters_count;
-				}
-
-			}
-
-			$filter_box = new XMLElement('div', null, array('class' => 'filter default'));
-
-			$filter_keys = array(
-				array('name', false, __('Name')),
-				array('source', false, __('Source')),
-				array('pages', false, __('Pages')),
-				array('author', false, __('Author')),
-			);
-
-			$filter_box->appendChild(Widget::Select('filter-key-' . $filters_count, $filter_keys));
-
-			$filter_modes = array(
-				array('0', false, __('is')),
-				array('1', false, __('contains')),
-			);
-
-			$filter_box->appendChild(Widget::Select('filter-mode-' . $filters_count, $filter_modes));
-
-			$filter_box->appendChild(Widget::Input('filter-value-' . $filters_count));
-
-			$filters_panel->appendChild($filter_box);
-			$filters_panel->appendChild(Widget::Input('action[process-filters]', __('Apply'), 'submit', array('class' => 'button apply')));;
-
-			$this->Form->appendChild($filters_panel);
+			$filtering = new Filtering($this->_Parent, Filtering::MODE_DATASOURCES);
+			$this->Form->appendChild($filtering->displayFiltersPanel($datasources));
 
 			/* Sorting */
 
-			if (isset($_REQUEST['sort']) && is_numeric($_REQUEST['sort'])) {
-				$sort = intval($_REQUEST['sort']);
-				$order = ($_REQUEST['order'] == 'desc' ? 'desc' : 'asc');
-			}
-			else {
-				$sort = 0;
-				$order = 'desc';
-			}
-
-			if ($sort == 1)
-				$datasources = $datasourceManager->sortBySource($order, $datasources);
-			else if ($sort == 3)
-				$datasources = $datasourceManager->sortByAuthor($order, $datasources);
-			else
-				$datasources = $datasourceManager->sortByName($order, $datasources);
+			$sorting = new Sorting($datasources, $sort, $order);
 
 			/* Columns */
 
@@ -236,7 +135,7 @@
 						$section = Widget::TableData(__('Unknown'));
 					}
 
-					$pages = $datasourceManager->getLinkedPages($d['handle']);
+					$pages = $filtering->getLinkedPages($d['handle']);
 					$pagelinks = array();
 
 					$i = 0;
@@ -292,34 +191,17 @@
 
 		public function __actionIndex(){
 			if (isset($_POST['action']) && is_array($_POST['action'])) {
+				$filtering = new Filtering($this->_Parent, Filtering::MODE_DATASOURCES);
 
 				foreach ($_POST['action'] as $key => $action) {
 					if ($key == 'process-filters') {
-						$string = "?filter=";
-
-						for ($i = 0; isset($_POST['filter-key-' . $i]); ++$i) {
-							if ($_POST['filter-value-' . $i] == '') continue;
-
-							$key = $_POST['filter-key-' . $i];
-							$mode = (intval($_POST['filter-mode-' . $i]) == DatasourceManagerAdvanced::FILTER_IS) ? ':' : '*:';
-							$value = rawurlencode($_POST['filter-value-' . $i]);
-							$string .= $key . $mode . $value .";";
-						}
+						$string = $filtering->buildFiltersString();
 
 						redirect($this->_Parent->getCurrentPageURL() . $string);
 					}
 					else if (strpos($key, 'filter-skip-') !== false) {
 						$filter_to_skip = str_replace('filter-skip-', '', $key);
-						$string = "?filter=";
-
-						for ($i = 0; isset($_POST['filter-key-' . $i]); ++$i) {
-							if ($i == $filter_to_skip || $_POST['filter-value-' . $i] == '') continue;
-
-							$key = $_POST['filter-key-' . $i];
-							$mode = (intval($_POST['filter-mode-' . $i]) == DatasourceManagerAdvanced::FILTER_IS) ? ':' : '*:';
-							$value = rawurlencode($_POST['filter-value-' . $i]);
-							$string .= $key . $mode . $value .";";
-						}
+						$string = $filtering->buildFiltersString($filter_to_skip);
 
 						redirect($this->_Parent->getCurrentPageURL() . $string);
 					}
