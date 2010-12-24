@@ -6,15 +6,10 @@
 		const FILTER_CONTAINS    = 1;
 		const FILTER_EMPTY       = 2;
 
-		const MODE_DATASOURCES   = 100;
-		const MODE_EVENTS        = 200;
-
 		private $_Parent;
-		private $_mode;
 
-		public function __construct(&$parent, $mode){
+		public function __construct(&$parent){
 			$this->_Parent = $parent;
-			$this->_mode = $mode;
 		}
 
 		public function filterByName($value, $mode = self::FILTER_IS, $data = array()) {
@@ -41,7 +36,10 @@
 			$values = explode(',', $value);
 
 			foreach($data as $d) {
-				$pages = $this->getLinkedPages($d['handle']);
+				if (isset($d['type'])) 
+					$pages = $this->getDatasourceLinkedPages($d['handle']);
+				else
+					$pages = $this->getEventLinkedPages($d['handle']);
 				$accum = true;
 
 				if ($mode == self::FILTER_EMPTY && $value == "" && empty($pages)) {
@@ -66,13 +64,19 @@
 
 			if ($mode == self::FILTER_IS) {
 				foreach($data as $d) {
-					if ($d['type'] == $value)
+					if ($d['type'] == $value || $d['source'] == $value)
 						$result[$d['handle']] = $d;
 				}
 			}
 			else if ($mode == self::FILTER_CONTAINS) {
 				foreach($data as $d) {
-					if (stristr($d['type'], $value))
+					if (stristr($d['source'], $value) || stristr($d['type'], $value))
+						$result[$d['handle']] = $d;
+				}
+			}
+			else { // Only for events
+				foreach($data as $d) {
+					if (!isset($d['source']) || $d['source'] == "")
 						$result[$d['handle']] = $d;
 				}
 			}
@@ -99,15 +103,31 @@
 			return $result;
 		}
 
-		public function getLinkedPages($handle) {
+		public function getDatasourceLinkedPages($handle) {
 			if (!$handle) return array();
 
-			$field = ($this->_mode == self::MODE_DATASOURCES) ? "data_sources" : "events";
 			$query = 'SELECT `id`, `title`
 			          FROM tbl_pages
-			          WHERE `' . $field . '` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
-			$pages = $this->_Parent->Database->fetch($query);
+			          WHERE `data_sources` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
 
+			$pages = $this->_Parent->Database->fetch($query);
+			$result = array();
+
+			foreach($pages as $p) {
+				$result[$p['id']] = $p['title'];
+			}
+
+			return $result;
+		}
+
+		public function getEventLinkedPages($handle) {
+			if (!$handle) return array();
+
+			$query = 'SELECT `id`, `title`
+			          FROM tbl_pages
+			          WHERE `events` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
+
+			$pages = $this->_Parent->Database->fetch($query);
 			$result = array();
 
 			foreach($pages as $p) {
@@ -269,6 +289,7 @@
 					$results = $this->_Parent->Database->fetch($query);
 
 					if (!empty($results)) $value = $results[0]['id'];
+					else $value = Lang::createHandle(strtolower($value));
 				}
 				else if ($key == 'pages') {
 					$values = explode(',', $_POST['filter-value-' . $i]);

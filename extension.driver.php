@@ -5,8 +5,8 @@
 		public function about() {
 			return array(
 				'name'			=> 'Events, Datasources & Utilities Indexes',
-				'version'		=> '0.4.2',
-				'release-date'	=> '2010-12-23',
+				'version'		=> '0.4.3',
+				'release-date'	=> '2010-12-24',
 				'author' => array('name' => 'Simone Economo',
 					'website' => 'http://www.lineheight.net',
 					'email' => 'my.ekoes@gmail.com'),

@@ -35,7 +35,7 @@
 
 			/* Filtering */
 
-			$filtering = new Filtering($this->_Parent, Filtering::MODE_EVENTS);
+			$filtering = new Filtering($this->_Parent);
 			$this->Form->appendChild($filtering->displayFiltersPanel($events));
 
 			/* Sorting */
@@ -130,7 +130,7 @@
 						$section = Widget::TableData(__('None'));
 					}
 
-					$pages = $filtering->getLinkedPages($e['handle']);
+					$pages = $filtering->getEventLinkedPages($e['handle']);
 					$pagelinks = array();
 
 					$i = 0;
@@ -142,7 +142,9 @@
 						)->generate() . (count($pages) > $i ? (($i % 6) == 0 ? '<br />' : ', ') : '');
 					}
 
-					$pagelinks = Widget::TableData(implode('', $pagelinks));
+					$pages = implode('', $pagelinks);
+
+					$pagelinks = Widget::TableData($pages == "" ? __('None') : $pages);
 					$author = $e['author']['name'];
 
 					if (isset($e['author']['website'])) {

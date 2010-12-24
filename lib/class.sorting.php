@@ -3,6 +3,7 @@
 	class Sorting {
 
 		public function __construct(&$data, &$sort, &$order) {
+
 			if (isset($_REQUEST['sort']) && is_numeric($_REQUEST['sort'])) {
 				$sort = intval($_REQUEST['sort']);
 				$order = ($_REQUEST['order'] == 'desc' ? 'desc' : 'asc');
@@ -20,15 +21,15 @@
 				Sorting::sortByName($order, $data);
 		}
 
-		public static function sortByName($order, &$data = array()) {
+		public function sortByName($order, &$data = array()) {
 			if ($order == 'asc') krsort($data);
 
 			return $data;
 		}
 
-		public static function sortBySource($order, &$data = array()) {
+		public function sortBySource($order, &$data = array()) {
 			foreach ($data as $key => $about) {
-				$source[$key] = $about['type'];
+				$source[$key] = (isset($about['type']) ? $about['type'] : $about['source']);
 				$label[$key] = $key;
 			}
 
@@ -39,7 +40,7 @@
 			return $data;
 		}
 
-		public static function sortByAuthor($order, &$data = array()) {
+		public function sortByAuthor($order, &$data = array()) {
 			foreach ($data as $key => $about) {
 				$author[$key] = $about['author']['name'];
 				$label[$key] = $key;

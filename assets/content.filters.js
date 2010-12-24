@@ -1,7 +1,9 @@
 (function($){
 	$(document).ready(function(){
 
-		Symphony.Language.add({'Filtering': false});
+		/* Init */
+
+		Symphony.Language.add({ 'Filters': false });
 
 		$('h2:first')
 		.append(' <a class="button filtering"/>')
@@ -11,16 +13,28 @@
 
 				panel[panel.is(':visible') ? 'slideUp' : 'slideDown']('fast');
 			})
-			.text(Symphony.Language.get('Filtering'));
+			.text(Symphony.Language.get('Filters'));
 
-		$('.filters:first').hide();
+		if (window.location.toString().indexOf("?filter=") == -1) {
+			$('.filters:first').hide();
+		}
 
 		$('.filters .filter select').sb();
 
-		$('.filters .filter select.mode:first').change(function() {
+		$('.filters .filter').each(function() {
+			if ($(this).find('select.mode:first').val() == 2)
+				$(this).find('input[type=text]:first')
+					.attr('disabled', true);
+		});
+
+		/* Handlers */
+
+		$('.filters .filter select.mode:first').bind('change', function() {
+
 			$(this).parents('.filter')
 				.find('input[type=text]:first')
 				.attr('disabled', $(this).val() == 2);
+
 		});
 
 		$('.filters input[type=submit]').bind('click keypress', function(event) {

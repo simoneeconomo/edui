@@ -35,7 +35,7 @@
 
 			/* Filtering */
 
-			$filtering = new Filtering($this->_Parent, Filtering::MODE_DATASOURCES);
+			$filtering = new Filtering($this->_Parent);
 			$this->Form->appendChild($filtering->displayFiltersPanel($datasources));
 
 			/* Sorting */
@@ -127,7 +127,7 @@
 							);
 						}
 						else {
-							$section = Widget::TableData(ucwords($d['type']));
+							$section = Widget::TableData($d['type']);
 						}
 					}
 					else {
@@ -135,7 +135,7 @@
 						$section = Widget::TableData(__('Unknown'));
 					}
 
-					$pages = $filtering->getLinkedPages($d['handle']);
+					$pages = $filtering->getDatasourceLinkedPages($d['handle']);
 					$pagelinks = array();
 
 					$i = 0;
@@ -147,7 +147,9 @@
 						)->generate() . (count($pages) > $i ? (($i % 6) == 0 ? '<br />' : ', ') : '');
 					}
 
-					$pagelinks = Widget::TableData(implode('', $pagelinks));
+					$pages = implode('', $pagelinks);
+
+					$pagelinks = Widget::TableData($pages == "" ? __('None') : $pages);
 					$author = $d['author']['name'];
 
 					if (isset($d['author']['website'])) {
@@ -191,7 +193,7 @@
 
 		public function __actionIndex(){
 			if (isset($_POST['action']) && is_array($_POST['action'])) {
-				$filtering = new Filtering($this->_Parent, Filtering::MODE_DATASOURCES);
+				$filtering = new Filtering($this->_Parent);
 
 				foreach ($_POST['action'] as $key => $action) {
 					if ($key == 'process-filters') {
