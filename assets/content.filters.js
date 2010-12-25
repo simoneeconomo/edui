@@ -3,7 +3,7 @@
 
 	var MODE_EQUALS   = 0,
 	    MODE_CONTAINS = 1,
-	    MODE_EMPTY    = 2,
+	    MODE_EMPTY    = 2;
 
 	var Filtering = {
 
