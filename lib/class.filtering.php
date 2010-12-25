@@ -168,14 +168,14 @@
 					$filter_box = new XMLElement('div', null, array('class' => 'filter'));
 
 					$filter_keys = array(
-						array('name', false, __('Name')),
+						array('name',   false, __('Name')),
 						array('source', false, __('Source')),
-						array('pages', false, __('Pages')),
+						array('pages',  false, __('Pages')),
 						array('author', false, __('Author')),
 					);
 
 					$filter_modes = array(
-						array('0', ($mode == self::MODE_EQUALS),       __('equals')),
+						array('0', ($mode == self::MODE_EQUALS),   __('equals')),
 						array('1', ($mode == self::MODE_CONTAINS), __('contains')),
 						array('2', ($mode == self::MODE_EMPTY),    __('is empty')),
 					);
@@ -235,9 +235,9 @@
 			$filter_box = new XMLElement('div', null, array('class' => 'filter default'));
 
 			$filter_keys = array(
-				array('name', false, __('Name')),
+				array('name',   false, __('Name')),
 				array('source', false, __('Source')),
-				array('pages', false, __('Pages')),
+				array('pages',  false, __('Pages')),
 				array('author', false, __('Author')),
 			);
 
