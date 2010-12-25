@@ -2,9 +2,9 @@
 
 	Class Filtering {
 
-		const FILTER_IS          = 0;
-		const FILTER_CONTAINS    = 1;
-		const FILTER_EMPTY       = 2;
+		const MODE_EQUALS   = 0;
+		const MODE_CONTAINS = 1;
+		const MODE_EMPTY    = 2;
 
 		private $_Parent;
 
@@ -12,16 +12,16 @@
 			$this->_Parent = $parent;
 		}
 
-		public function filterByName($value, $mode = self::FILTER_IS, $data = array()) {
+		public function filterByName($value, $mode = self::MODE_EQUALS, $data = array()) {
 			$result = array();
 
-			if ($mode == self::FILTER_IS) {
+			if ($mode == self::MODE_EQUALS) {
 				foreach($data as $d) {
 					if ($d['name'] == $value)
 						$result[$d['handle']] = $d;
 				}
 			}
-			else if ($mode == self::FILTER_CONTAINS) {
+			else if ($mode == self::MODE_CONTAINS) {
 				foreach($data as $d) {
 					if (stristr($d['name'], $value))
 						$result[$d['handle']] = $d;
@@ -31,7 +31,7 @@
 			return $result;
 		}
 
-		public function filterByPages($value, $mode = self::FILTER_IS, $data = array()) {
+		public function filterByPages($value, $mode = self::MODE_EQUALS, $data = array()) {
 			$result = array();
 			$values = explode(',', $value);
 
@@ -42,10 +42,10 @@
 					$pages = $this->getEventLinkedPages($d['handle']);
 				$accum = true;
 
-				if ($mode == self::FILTER_EMPTY && $value == "" && empty($pages)) {
+				if ($mode == self::MODE_EMPTY && $value == "" && empty($pages)) {
 					$result[] = $d;
 				}
-				else if ($mode == self::FILTER_IS && count($values) != count($pages)) continue;
+				else if ($mode == self::MODE_EQUALS && count($values) != count($pages)) continue;
 
 				foreach($values as $v) {
 					if (!$accum) break;
@@ -59,16 +59,16 @@
 			return $result;
 		}
 
-		public function filterBySource($value, $mode = self::FILTER_IS, $data = array()) {
+		public function filterBySource($value, $mode = self::MODE_EQUALS, $data = array()) {
 			$result = array();
 
-			if ($mode == self::FILTER_IS) {
+			if ($mode == self::MODE_EQUALS) {
 				foreach($data as $d) {
 					if ($d['type'] == $value || $d['source'] == $value)
 						$result[$d['handle']] = $d;
 				}
 			}
-			else if ($mode == self::FILTER_CONTAINS) {
+			else if ($mode == self::MODE_CONTAINS) {
 				foreach($data as $d) {
 					if (stristr($d['source'], $value) || stristr($d['type'], $value))
 						$result[$d['handle']] = $d;
@@ -84,16 +84,16 @@
 			return $result;
 		}
 
-		public function filterByAuthor($value, $mode = self::FILTER_IS, $data = array()) {
+		public function filterByAuthor($value, $mode = self::MODE_EQUALS, $data = array()) {
 			$result = array();
 
-			if ($mode == self::FILTER_IS) {
+			if ($mode == self::MODE_EQUALS) {
 				foreach($data as $d) {
 					if ($d['author']['name'] == $value)
 						$result[$d['handle']] = $d;
 				}
 			}
-			else if ($mode == self::FILTER_CONTAINS) {
+			else if ($mode == self::MODE_CONTAINS) {
 				foreach($data as $d) {
 					if (stristr($d['author']['name'], $value))
 						$result[$d['handle']] = $d;
@@ -153,14 +153,14 @@
 
 					if ($key{0} == "!") {
 						$key = substr($key, 1);
-						$mode = self::FILTER_EMPTY;
+						$mode = self::MODE_EMPTY;
 					}
 					else if ($key{strlen($key)-1} == "*") {
 						$key = substr($key, 0, strlen($key)-1);
-						$mode = self::FILTER_CONTAINS;
+						$mode = self::MODE_CONTAINS;
 					}
 					else {
-						$mode = self::FILTER_IS;
+						$mode = self::MODE_EQUALS;
 					}
 
 					$value = rawurldecode($value);
@@ -175,9 +175,9 @@
 					);
 
 					$filter_modes = array(
-						array('0', ($mode == self::FILTER_IS),       __('equals')),
-						array('1', ($mode == self::FILTER_CONTAINS), __('contains')),
-						array('2', ($mode == self::FILTER_EMPTY),    __('is empty')),
+						array('0', ($mode == self::MODE_EQUALS),       __('equals')),
+						array('1', ($mode == self::MODE_CONTAINS), __('contains')),
+						array('2', ($mode == self::MODE_EMPTY),    __('is empty')),
 					);
 
 					switch($key) {
@@ -268,10 +268,10 @@
 				$key = $_POST['filter-key-' . $i];
 				$mode = intval($_POST['filter-mode-' . $i]);
 
-				if ($mode == self::FILTER_IS) {
+				if ($mode == self::MODE_EQUALS) {
 					$sep = ":";
 				}
-				else if ($mode == self::FILTER_CONTAINS) {
+				else if ($mode == self::MODE_CONTAINS) {
 					$sep = "*:";
 				}
 				else {
@@ -280,7 +280,7 @@
 
 				$value = $_POST['filter-value-' . $i];
 
-				if ($value == "" && $mode != self::FILTER_EMPTY) continue;
+				if ($value == "" && $mode != self::MODE_EMPTY) continue;
 
 				if ($key == 'source') {
 					$query = 'SELECT `id`

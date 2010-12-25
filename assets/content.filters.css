@@ -24,7 +24,9 @@
 }
 
 .filters .filter {
+/*	overflow: hidden;*/
 	width: 510px;
+	height: 28px;
 	margin-bottom: 1.2em;
 	-webkit-border-radius: 3px;
 	-moz-border-radius: 3px;
@@ -92,7 +94,7 @@
 	outline: none;
 }
 
-.selectbox .value { display :none; }
+.selectbox .display .value { display: none; }
 
 .items {
 	z-index: 99999;
@@ -136,7 +138,15 @@
 	color: #fcfcfc;
 }
 
-.items .value{ display: none; }
+.items .value { display: none; }
+
+.filters .filter .selectbox.value .display {
+	width: 290px;
+}
+
+.filters .default .selectbox.value .display {
+	width: 315px;
+}
 
 .filters .filter input {
 	height: 22px;
