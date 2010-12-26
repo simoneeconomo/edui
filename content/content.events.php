@@ -126,7 +126,13 @@
 						);
 					}
 					else {
-						$name = Widget::TableData($e['name']);
+						$name = Widget::TableData(
+							Widget::Anchor(
+								$e['name'],
+								URL . '/symphony/blueprints/events/info/' . $e['handle'] . '/',
+								$e['handle']
+							)
+						);
 						$section = Widget::TableData(__('None'));
 					}
 

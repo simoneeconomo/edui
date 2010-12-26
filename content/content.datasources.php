@@ -105,7 +105,6 @@
 				$bOdd = true;
 
 				foreach($datasources as $d) {
-
 					if ($d['can_parse']) {
 						$name = Widget::TableData(
 							Widget::Anchor(
@@ -131,7 +130,13 @@
 						}
 					}
 					else {
-						$name = Widget::TableData($d['name']);
+						$name = Widget::TableData(
+							Widget::Anchor(
+								$d['name'],
+								URL . '/symphony/blueprints/datasources/info/' . $d['handle'] . '/',
+								$d['handle']
+							)
+						);
 						$section = Widget::TableData(__('Unknown'));
 					}
 
