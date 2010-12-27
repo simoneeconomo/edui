@@ -99,8 +99,11 @@
 
 			if ($(that).is('.key')) {
 				var mode = parent.find('select.mode');
+				var old = parent.find('input.value:first, select.value:first');
 
 				if (($(that).val() == 'source' || $(that).val() == 'pages') && mode.val() == 0) {
+
+					if (old.is('input') && old.val().indexOf(",") != -1) return;
 
 					$.ajax({
 						type: 'GET',
@@ -109,7 +112,6 @@
 						dataType: 'json',
 						success: function(result) {
 
-							var old = parent.find('input.value:first, select.value:first');
 							var select = $('<select class="value" />')
 								.attr('name', old.attr('name'));
 

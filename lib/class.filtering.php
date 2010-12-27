@@ -12,6 +12,15 @@
 			$this->_Parent = $parent;
 		}
 
+		private function prepareArray(&$data) {
+			foreach($data as &$d) {
+				if (!isset($d['source']))
+					$d['source'] = "";
+				if (isset($d['type']))
+					$d['source'] = $d['type'];
+			}
+		}
+
 		public function filterByName($value, $mode = self::MODE_EQUALS, $data = array()) {
 			$result = array();
 
@@ -34,6 +43,8 @@
 		public function filterByPages($value, $mode = self::MODE_EQUALS, $data = array()) {
 			$result = array();
 			$values = explode(',', $value);
+
+			$this->prepareArray($data);
 
 			foreach($data as $d) {
 				if (isset($d['type'])) 
@@ -62,21 +73,23 @@
 		public function filterBySource($value, $mode = self::MODE_EQUALS, $data = array()) {
 			$result = array();
 
+			$this->prepareArray($data);
+
 			if ($mode == self::MODE_EQUALS) {
 				foreach($data as $d) {
-					if ($d['type'] == $value || $d['source'] == $value)
+					if ($d['source'] == $value)
 						$result[$d['handle']] = $d;
 				}
 			}
 			else if ($mode == self::MODE_CONTAINS) {
 				foreach($data as $d) {
-					if (stristr($d['source'], $value) || stristr($d['type'], $value))
+					if (stristr($d['source'], $value))
 						$result[$d['handle']] = $d;
 				}
 			}
-			else { // Only for events
+			else {
 				foreach($data as $d) {
-					if (!isset($d['source']) || $d['source'] == "")
+					if (empty($d['source']))
 						$result[$d['handle']] = $d;
 				}
 			}

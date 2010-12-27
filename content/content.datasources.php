@@ -137,7 +137,7 @@
 								$d['handle']
 							)
 						);
-						$section = Widget::TableData(__('Unknown'));
+						$section = Widget::TableData(__('None'));
 					}
 
 					$pages = $filtering->getDatasourceLinkedPages($d['handle']);
