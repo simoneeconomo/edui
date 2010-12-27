@@ -1,12 +1,12 @@
 <?php
 
-	Class Filtering {
+	abstract class Filtering {
 
 		const MODE_EQUALS   = 0;
 		const MODE_CONTAINS = 1;
 		const MODE_EMPTY    = 2;
 
-		private $_Parent;
+		protected $_Parent;
 
 		public function __construct(&$parent){
 			$this->_Parent = $parent;
@@ -47,10 +47,7 @@
 			$this->prepareArray($data);
 
 			foreach($data as $d) {
-				if (isset($d['type'])) 
-					$pages = $this->getDatasourceLinkedPages($d['handle']);
-				else
-					$pages = $this->getEventLinkedPages($d['handle']);
+				$pages = $this->getLinkedPages($d['handle']);
 				$accum = true;
 
 				if ($mode == self::MODE_EMPTY && $value == "" && empty($pages)) {
@@ -111,40 +108,6 @@
 					if (stristr($d['author']['name'], $value))
 						$result[$d['handle']] = $d;
 				}
-			}
-
-			return $result;
-		}
-
-		public function getDatasourceLinkedPages($handle) {
-			if (!$handle) return array();
-
-			$query = 'SELECT `id`, `title`
-			          FROM tbl_pages
-			          WHERE `data_sources` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
-
-			$pages = $this->_Parent->Database->fetch($query);
-			$result = array();
-
-			foreach($pages as $p) {
-				$result[$p['id']] = $p['title'];
-			}
-
-			return $result;
-		}
-
-		public function getEventLinkedPages($handle) {
-			if (!$handle) return array();
-
-			$query = 'SELECT `id`, `title`
-			          FROM tbl_pages
-			          WHERE `events` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
-
-			$pages = $this->_Parent->Database->fetch($query);
-			$result = array();
-
-			foreach($pages as $p) {
-				$result[$p['id']] = $p['title'];
 			}
 
 			return $result;
@@ -326,6 +289,56 @@
 			}
 
 			return ($string == "?filter=") ? "" : $string;
+		}
+
+	}
+
+	class DatasourcesFiltering extends Filtering {
+
+		public function __construct(&$parent){
+			parent::__construct($parent);
+		}
+
+		public function getLinkedPages($handle) {
+			if (!$handle) return array();
+
+			$query = 'SELECT `id`, `title`
+			          FROM tbl_pages
+			          WHERE `data_sources` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
+
+			$pages = $this->_Parent->Database->fetch($query);
+			$result = array();
+
+			foreach($pages as $p) {
+				$result[$p['id']] = $p['title'];
+			}
+
+			return $result;
+		}
+
+	}
+
+	class EventsFiltering extends Filtering {
+
+		public function __construct(&$parent){
+			parent::__construct($parent);
+		}
+
+		public function getLinkedPages($handle) {
+			if (!$handle) return array();
+
+			$query = 'SELECT `id`, `title`
+			          FROM tbl_pages
+			          WHERE `events` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
+
+			$pages = $this->_Parent->Database->fetch($query);
+			$result = array();
+
+			foreach($pages as $p) {
+				$result[$p['id']] = $p['title'];
+			}
+
+			return $result;
 		}
 
 	}

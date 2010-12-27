@@ -35,7 +35,7 @@
 
 			/* Filtering */
 
-			$filtering = new Filtering($this->_Parent);
+			$filtering = new EventsFiltering($this->_Parent);
 			$this->Form->appendChild($filtering->displayFiltersPanel($events));
 
 			/* Sorting */
@@ -136,7 +136,7 @@
 						$section = Widget::TableData(__('None'));
 					}
 
-					$pages = $filtering->getEventLinkedPages($e['handle']);
+					$pages = $filtering->getLinkedPages($e['handle']);
 					$pagelinks = array();
 
 					$i = 0;
@@ -194,7 +194,7 @@
 
 		public function __actionIndex(){
 			if (isset($_POST['action']) && is_array($_POST['action'])) {
-				$filtering = new Filtering($this->_Parent);
+				$filtering = new EventsFiltering($this->_Parent);
 
 				foreach ($_POST['action'] as $key => $action) {
 					if ($key == 'process-filters') {

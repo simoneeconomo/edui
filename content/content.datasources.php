@@ -35,7 +35,7 @@
 
 			/* Filtering */
 
-			$filtering = new Filtering($this->_Parent);
+			$filtering = new DatasourcesFiltering($this->_Parent);
 			$this->Form->appendChild($filtering->displayFiltersPanel($datasources));
 
 			/* Sorting */
@@ -140,7 +140,7 @@
 						$section = Widget::TableData(__('None'));
 					}
 
-					$pages = $filtering->getDatasourceLinkedPages($d['handle']);
+					$pages = $filtering->getLinkedPages($d['handle']);
 					$pagelinks = array();
 
 					$i = 0;
@@ -198,7 +198,7 @@
 
 		public function __actionIndex(){
 			if (isset($_POST['action']) && is_array($_POST['action'])) {
-				$filtering = new Filtering($this->_Parent);
+				$filtering = new DatasourcesFiltering($this->_Parent);
 
 				foreach ($_POST['action'] as $key => $action) {
 					if ($key == 'process-filters') {

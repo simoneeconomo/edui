@@ -21,6 +21,15 @@
 				Sorting::sortByName($order, $data);
 		}
 
+		private function prepareArray(&$data) {
+			foreach($data as &$d) {
+				if (!isset($d['source']))
+					$d['source'] = "";
+				if (isset($d['type']))
+					$d['source'] = $d['type'];
+			}
+		}
+
 		public function sortByName($order, &$data = array()) {
 			if ($order == 'asc') krsort($data);
 
@@ -28,8 +37,10 @@
 		}
 
 		public function sortBySource($order, &$data = array()) {
+			$this->prepareArray($data);
+
 			foreach ($data as $key => $about) {
-				$source[$key] = (isset($about['type']) ? $about['type'] : $about['source']);
+				$source[$key] = $about['source'];
 				$label[$key] = $key;
 			}
 
