@@ -6,6 +6,7 @@
 
 	require_once(EXTENSIONS . '/edui/lib/class.sorting.php');
 	require_once(EXTENSIONS . '/edui/lib/class.filtering.php');
+	require_once(EXTENSIONS . '/edui/lib/class.pagemanager.php');
 
 	class contentExtensionEduiEvents extends AdministrationPage {
 		public $_errors;
@@ -186,6 +187,20 @@
 				array('delete', false, __('Delete'), 'confirm'),
 			);
 
+			$pageManager = new PageManager($this->_Parent);
+			$pages = $pageManager->listAll();
+
+			$group_link = array('label' => __('Link Page'), 'options' => array());
+			$group_unlink = array('label' => __('Unlink Page'), 'options' => array());
+
+			foreach($pages as $p) {
+				$group_link['options'][] = array('link-page-' . $p['handle'], false, $p['title']);
+				$group_unlink['options'][] = array('unlink-page-' . $p['handle'], false, $p['title']);
+			}
+
+			$options[] = $group_link;
+			$options[] = $group_unlink;
+
 			$tableActions->appendChild(Widget::Select('with-selected', $options));
 			$tableActions->appendChild(Widget::Input('action[apply]', __('Apply'), 'submit'));
 
@@ -213,21 +228,37 @@
 
 						if (is_array($checked) && !empty($checked)) {
 
-							switch($_POST['with-selected']) {
+							if ($_POST['with-selected'] == 'delete') {
+								$canProceed = true;
 
-								case 'delete':
-									$canProceed = true;
-
-									foreach($checked as $name) {
-										if (!General::deleteFile(EVENTS . '/event.' . $name . '.php')) {
-											$this->pageAlert(__('Failed to delete <code>%s</code>. Please check permissions.', array($name)),Alert::ERROR);
-											$canProceed = false;
-										}
+								foreach($checked as $name) {
+									if (!General::deleteFile(EVENTS . '/event.' . $name . '.php')) {
+										$this->pageAlert(__('Failed to delete <code>%s</code>. Please check permissions.', array($name)),Alert::ERROR);
+										$canProceed = false;
 									}
+								}
 
-									if ($canProceed) redirect($this->_Parent->getCurrentPageURL());
-									break;
+								if ($canProceed) redirect($this->_Parent->getCurrentPageURL());
+							}
+							else if(preg_match('/^(?:un)?link-page-/', $_POST['with-selected'])) {
+								$pageManager = new PageManager($this->_Parent);
 
+								if (substr($_POST['with-selected'], 0, 2) == 'un') {
+									$page = str_replace('unlink-page-', '', $_POST['with-selected']);
+
+									foreach($checked as $handle) {
+										$pageManager->unlinkEvent($handle, $page);
+									}
+								}
+								else {
+									$page = str_replace('link-page-', '', $_POST['with-selected']);
+
+									foreach($checked as $handle) {
+										$pageManager->linkEvent($handle, $page);
+									}
+								}
+
+								redirect($this->_Parent->getCurrentPageURL());
 							}
 
 						}
