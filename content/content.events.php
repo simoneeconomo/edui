@@ -146,7 +146,7 @@
 						$pagelinks[] = Widget::Anchor(
 							$value,
 							URL . '/symphony/blueprints/pages/edit/' . $key
-						)->generate() . (count($pages) > $i ? (($i % 6) == 0 ? '<br />' : ', ') : '');
+						)->generate() . (count($pages) > $i ? (($i % 10) == 0 ? '<br />' : ', ') : '');
 					}
 
 					$pages = implode('', $pagelinks);
@@ -196,6 +196,9 @@
 
 			$group_link = array('label' => __('Link Page'), 'options' => array());
 			$group_unlink = array('label' => __('Unlink Page'), 'options' => array());
+
+			$group_link['options'][] = array('link-all-pages', false, __('All'));
+			$group_unlink['options'][] = array('unlink-all-pages', false, __('All'));
 
 			foreach($pages as $p) {
 				$group_link['options'][] = array('link-page-' . $p['handle'], false, $p['title']);
@@ -259,6 +262,27 @@
 
 									foreach($checked as $handle) {
 										$pageManager->linkEvent($handle, $page);
+									}
+								}
+
+								redirect($this->_Parent->getCurrentPageURL());
+							}
+							else if(preg_match('/^(?:un)?link-all-pages$/', $_POST['with-selected'])) {
+								$pageManager = new PageManager($this->_Parent);
+								$pages = $pageManager->listAll();
+
+								if (substr($_POST['with-selected'], 0, 2) == 'un') {
+									foreach($checked as $handle) {
+										foreach($pages as $page) {
+											$pageManager->unlinkDatasource($handle, $page['handle']);
+										}
+									}
+								}
+								else {
+									foreach($checked as $handle) {
+										foreach($pages as $page) {
+											$pageManager->linkDatasource($handle, $page['handle']);
+										}
 									}
 								}
 
