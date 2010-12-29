@@ -138,7 +138,7 @@
 								$d['handle']
 							)
 						);
-						$section = Widget::TableData(__('None'));
+						$section = Widget::TableData(__('None'), 'inactive');
 					}
 
 					$pages = $filtering->getLinkedPages($d['handle']);
@@ -155,7 +155,11 @@
 
 					$pages = implode('', $pagelinks);
 
-					$pagelinks = Widget::TableData($pages == "" ? __('None') : $pages);
+					if ($pages == "")
+						$pagelinks = Widget::TableData(__('None'), 'inactive');
+					else
+						$pagelinks = Widget::TableData($pages);
+
 					$author = $d['author']['name'];
 
 					if (isset($d['author']['website'])) {
