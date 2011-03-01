@@ -4,15 +4,11 @@
 
 	class PageManager extends Manager{
 
-		public function __construct(&$parent) {
-			parent::__construct($parent);
-		}
-
 		public function listAll(){
 			$query = "SELECT `handle`, `title`
 			          FROM `tbl_pages`";
 
-			$results = $this->_Parent->Database->fetch($query);
+			$results = Symphony::Database()->fetch($query);
 
 			return $results;
 		}
@@ -22,7 +18,7 @@
 			          FROM `tbl_pages`
 			          WHERE `handle` = '" . $page_handle . "'";
 
-			$results = $this->_Parent->Database->fetch($query);
+			$results = Symphony::Database()->fetch($query);
 
 			if (is_array($results) && count($results) == 1) {
 				$result = $results[0][$field];
@@ -34,7 +30,7 @@
 					          SET `" . $field . "` = '" . $result . "'
 					          WHERE `handle` = '" . $page_handle . "'";
 
-					$this->_Parent->Database->fetch($query);
+					Symphony::Database()->fetch($query);
 				}
 			}
 		}
@@ -44,7 +40,7 @@
 			          FROM `tbl_pages`
 			          WHERE `handle` = '" . $page_handle . "'";
 
-			$results = $this->_Parent->Database->fetch($query);
+			$results = Symphony::Database()->fetch($query);
 
 			if (is_array($results) && count($results) == 1) {
 				$result = $results[0][$field];
@@ -57,7 +53,7 @@
 					          SET `" . $field . "` = '" . $result . "'
 					          WHERE `handle` = '" . $page_handle . "'";
 
-					$this->_Parent->Database->fetch($query);
+					Symphony::Database()->fetch($query);
 				}
 			}
 		}

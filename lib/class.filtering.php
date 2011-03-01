@@ -6,12 +6,6 @@
 		const MODE_CONTAINS = 1;
 		const MODE_EMPTY    = 2;
 
-		protected $_Parent;
-
-		public function __construct(&$parent){
-			$this->_Parent = $parent;
-		}
-
 		private function prepareArray(&$data) {
 			foreach($data as &$d) {
 				if (!isset($d['source']))
@@ -169,7 +163,7 @@
 							$query = 'SELECT `name`
 							          FROM tbl_sections
 							          WHERE `id` = "' . General::sanitize($value) .'"';
-							$results = $this->_Parent->Database->fetch($query);
+							$results = Symphony::Database()->fetch($query);
 
 							if (!empty($results)) $value = $results[0]['name'];
 							break;
@@ -183,7 +177,7 @@
 								$query = 'SELECT `title`
 								          FROM tbl_pages
 								          WHERE `id` = "' . General::sanitize(trim($v)) .'"';
-								$results = $this->_Parent->Database->fetch($query);
+								$results = Symphony::Database()->fetch($query);
 
 								if (!empty($results)) $v = $results[0]['title'];
 							}
@@ -239,10 +233,13 @@
 			$string = "?filter=";
 
 			for ($i = 0; isset($_POST['filter-key-' . $i]); ++$i) {
-				if ($jump != null && $i == intval($jump)) continue;
+				if ($jump != null && $i == $jump + 0) continue;
 
 				$key = $_POST['filter-key-' . $i];
-				$mode = intval($_POST['filter-mode-' . $i]);
+				$mode = $_POST['filter-mode-' . $i] + 0;
+				$value = $_POST['filter-value-' . $i];
+
+				if (empty($value) && $mode != self::MODE_EMPTY) continue;
 
 				if ($mode == self::MODE_EQUALS) {
 					$sep = ":";
@@ -250,19 +247,16 @@
 				else if ($mode == self::MODE_CONTAINS) {
 					$sep = "*:";
 				}
-				else {
+				else if ($mode == self::MODE_EMPTY) {
+					$sep = "";
 					$key = "!" . $key;
 				}
-
-				$value = $_POST['filter-value-' . $i];
-
-				if ($value == "" && $mode != self::MODE_EMPTY) continue;
 
 				if ($key == 'source') {
 					$query = 'SELECT `id`
 					          FROM tbl_sections
 					          WHERE `name` = "' . General::sanitize($value) .'"';
-					$results = $this->_Parent->Database->fetch($query);
+					$results = Symphony::Database()->fetch($query);
 
 					if (!empty($results)) $value = $results[0]['id'];
 					else $value = Lang::createHandle(strtolower($value));
@@ -274,7 +268,7 @@
 						$query = 'SELECT `id`
 						          FROM tbl_pages
 						          WHERE `title` = "' . General::sanitize(trim($v)) .'"';
-						$results = $this->_Parent->Database->fetch($query);
+						$results = Symphony::Database()->fetch($query);
 
 						if (!empty($results))
 							$v = $results[0]['id'];
@@ -285,7 +279,7 @@
 
 				$value = rawurlencode($value);
 
-				$string .= $key . $sep . $value .";";
+				$string .= $key . $sep . $value . ";";
 			}
 
 			return ($string == "?filter=") ? "" : $string;
@@ -295,10 +289,6 @@
 
 	class DatasourcesFiltering extends Filtering {
 
-		public function __construct(&$parent){
-			parent::__construct($parent);
-		}
-
 		public function getLinkedPages($handle) {
 			if (!$handle) return array();
 
@@ -306,7 +296,7 @@
 			          FROM tbl_pages
 			          WHERE `data_sources` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
 
-			$pages = $this->_Parent->Database->fetch($query);
+			$pages = Symphony::Database()->fetch($query);
 			$result = array();
 
 			foreach($pages as $p) {
@@ -320,10 +310,6 @@
 
 	class EventsFiltering extends Filtering {
 
-		public function __construct(&$parent){
-			parent::__construct($parent);
-		}
-
 		public function getLinkedPages($handle) {
 			if (!$handle) return array();
 
@@ -331,7 +317,7 @@
 			          FROM tbl_pages
 			          WHERE `events` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
 
-			$pages = $this->_Parent->Database->fetch($query);
+			$pages = Symphony::Database()->fetch($query);
 			$result = array();
 
 			foreach($pages as $p) {

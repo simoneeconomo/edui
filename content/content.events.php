@@ -36,7 +36,7 @@
 
 			/* Filtering */
 
-			$filtering = new EventsFiltering($this->_Parent);
+			$filtering = new EventsFiltering();
 			$this->Form->appendChild($filtering->displayFiltersPanel($events));
 
 			/* Sorting */
@@ -120,9 +120,9 @@
 
 						$section = Widget::TableData(
 							Widget::Anchor(
-								$sectionData->_data['name'],
-								URL . '/symphony/blueprints/sections/edit/' . $sectionData->_data['id'] . '/',
-								$sectionData->_data['handle']
+								$sectionData->get('name'),
+								URL . '/symphony/blueprints/sections/edit/' . $sectionData->get('id') . '/',
+								$sectionData->get('handle')
 							)
 						);
 					}
@@ -176,7 +176,8 @@
 			$table = Widget::Table(
 				Widget::TableHead($aTableHead), 
 				NULL, 
-				Widget::TableBody($aTableBody)
+				Widget::TableBody($aTableBody),
+				'selectable'
 			);
 
 			$this->Form->appendChild($table);
@@ -216,19 +217,19 @@
 
 		public function __actionIndex(){
 			if (isset($_POST['action']) && is_array($_POST['action'])) {
-				$filtering = new EventsFiltering($this->_Parent);
+				$filtering = new EventsFiltering();
 
 				foreach ($_POST['action'] as $key => $action) {
 					if ($key == 'process-filters') {
 						$string = $filtering->buildFiltersString();
 
-						redirect($this->_Parent->getCurrentPageURL() . $string);
+						redirect(Administration::instance()->getCurrentPageURL() . $string);
 					}
 					else if (strpos($key, 'filter-skip-') !== false) {
 						$filter_to_skip = str_replace('filter-skip-', '', $key);
 						$string = $filtering->buildFiltersString($filter_to_skip);
 
-						redirect($this->_Parent->getCurrentPageURL() . $string);
+						redirect(Administration::instance()->getCurrentPageURL() . $string);
 					}
 					else {
 						$checked = @array_keys($_POST['items']);
@@ -245,10 +246,10 @@
 									}
 								}
 
-								if ($canProceed) redirect($this->_Parent->getCurrentPageURL());
+								if ($canProceed) redirect(Administration::instance()->getCurrentPageURL());
 							}
 							else if(preg_match('/^(?:un)?link-page-/', $_POST['with-selected'])) {
-								$pageManager = new PageManager($this->_Parent);
+								$pageManager = new PageManager();
 
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									$page = str_replace('unlink-page-', '', $_POST['with-selected']);
@@ -265,10 +266,10 @@
 									}
 								}
 
-								redirect($this->_Parent->getCurrentPageURL());
+								redirect(Administration::instance()->getCurrentPageURL());
 							}
 							else if(preg_match('/^(?:un)?link-all-pages$/', $_POST['with-selected'])) {
-								$pageManager = new PageManager($this->_Parent);
+								$pageManager = new PageManager();
 								$pages = $pageManager->listAll();
 
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
@@ -286,7 +287,7 @@
 									}
 								}
 
-								redirect($this->_Parent->getCurrentPageURL());
+								redirect(Administration::instance()->getCurrentPageURL());
 							}
 
 						}

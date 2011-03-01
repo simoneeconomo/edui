@@ -49,10 +49,11 @@
 			}
 
 			$table = Widget::Table(
-								Widget::TableHead($aTableHead), 
-								NULL, 
-								Widget::TableBody($aTableBody)
-						);
+				Widget::TableHead($aTableHead), 
+				NULL, 
+				Widget::TableBody($aTableBody),
+				'selectable'
+			);
 
 			$this->Form->appendChild($table);
 			
@@ -86,7 +87,7 @@
 							}
 						}
 
-						if ($canProceed) redirect($this->_Parent->getCurrentPageURL());
+						if ($canProceed) redirect(Administration::instance()->getCurrentPageURL());
 						break;
 				}
 			}

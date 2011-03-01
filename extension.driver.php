@@ -82,7 +82,7 @@
 
 			else if (in_array($callback['driver'], array_keys($links))) {
 
-				$c = $this->_Parent->Page->Form->getChildren();
+				$c = $this->_Parent->Page->Header->getChildren();
 
 				if ($callback['context'][2] && (in_array($callback['context'][2], array('saved', 'created')))) {
 					$c[0]->setValue(str_replace('blueprints/components/', $links[$callback['driver']], $c[0]->getValue()));

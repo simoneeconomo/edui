@@ -17,7 +17,7 @@
 					          FROM `tbl_pages`";
 				}
 
-				$results = $this->_Parent->Database->fetch($query);
+				$results = Symphony::Database()->fetch($query);
 			}
 
 			$this->_Result = json_encode($results);

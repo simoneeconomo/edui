@@ -35,118 +35,121 @@
 		linear,
 		left bottom,
 		left top,
-		color-stop(0.02, rgb(222, 222, 222)),
-		color-stop(0.51, rgb(245, 245, 245))
+		color-stop(0.00, rgb(222, 222, 222)),
+		color-stop(0.39, rgb(245, 245, 245))
 	);
 	background: -moz-linear-gradient(
 		center bottom,
-		rgb(222, 222, 222) 2%,
-		rgb(245, 245, 245) 51%
+		rgb(222, 222, 222) 0%,
+		rgb(245, 245, 245) 39%
 	);
 	-webkit-box-shadow: 1px 0 8px #2E2E2A, 1px 1px 8px #2E2E2A, 0 1px 8px #2E2E2A;
 	-moz-box-shadow: 1px 0 8px #2E2E2A, 1px 1px 8px #2E2E2A, 0 1px 8px #2E2E2A;
+	line-height: 30px;
 }
 
 .filters .filter select {
 	margin: 0 0 0 10px;
+	display: inline-block;
+	width: auto;
 }
 
 .filters .filter select.mode {
 	margin-right: 8px;
 }
 
-.selectbox {
-	position: relative;
-	float: left;
-	margin: 2px 0 0 1px;
-	border-left: 1px solid #CACACA;
-	font: 11px/normal 'Lucida Grande', Meiryo, Tahoma, Verdana, sans-serif;
-}
+/*.selectbox {*/
+/*	position: relative;*/
+/*	float: left;*/
+/*	margin: 2px 0 0 1px;*/
+/*	border-left: 1px solid #CACACA;*/
+/*	font: 11px/normal 'Lucida Grande', Meiryo, Tahoma, Verdana, sans-serif;*/
+/*}*/
 
-.selectbox:focus {
-	text-decoration: underline;
-}
+/*.selectbox:focus {*/
+/*	text-decoration: underline;*/
+/*}*/
 
-.selectbox:first-child {
-	border: none;
-	margin-left: 0;
-}
+/*.selectbox:first-child {*/
+/*	border: none;*/
+/*	margin-left: 0;*/
+/*}*/
 
-.selectbox .display {
-	position: relative;
-	display: block;
-	margin: 0;
-	padding: 0 24px 0 10px;
-	height: 23px;
-	color: #554;
-	line-height: 26px;
-	text-decoration:none;
-}
+/*.selectbox .display {*/
+/*	position: relative;*/
+/*	display: block;*/
+/*	margin: 0;*/
+/*	padding: 0 24px 0 10px;*/
+/*	height: 23px;*/
+/*	color: #554;*/
+/*	line-height: 26px;*/
+/*	text-decoration:none;*/
+/*}*/
 
-.selectbox .display .arrow_btn {
-	position: absolute;
-	top: 2px; right: 0; bottom: 0;
-	width: 20px;
-	background: transparent url(images/arrow.png) no-repeat center center;
-}
+/*.selectbox .display .arrow_btn {*/
+/*	position: absolute;*/
+/*	top: 2px; right: 0; bottom: 0;*/
+/*	width: 20px;*/
+/*	background: transparent url(images/arrow.png) no-repeat center center;*/
+/*}*/
 
-.selectbox .display:focus {
-	outline: none;
-}
+/*.selectbox .display:focus {*/
+/*	outline: none;*/
+/*}*/
 
-.selectbox .display .value { display: none; }
+/*.selectbox .display .value { display: none; }*/
 
-.items {
-	z-index: 99999;
-	display: block;
-	overflow: auto;
-	max-width: 100%;
-	margin: 0;
-	background: #fff;
-	border: 1px solid #828790;
-	-webkit-border-radius: 0 0 3px 3px;
-	-moz-border-radius: 0 0 3px 3px;
-	border-radius: 0 0 3px 3px;
-	list-style: none;
-	moz-box-shadow: 0 3px 5px rgba(0,0,0,.5);
-	webkit-box-shadow: 0 3px 5px rgba(0,0,0,.5);
-}
+/*.items {*/
+/*	z-index: 99999;*/
+/*	display: block;*/
+/*	overflow: auto;*/
+/*	max-width: 100%;*/
+/*	margin: 0;*/
+/*	background: #fff;*/
+/*	border: 1px solid #828790;*/
+/*	-webkit-border-radius: 0 0 3px 3px;*/
+/*	-moz-border-radius: 0 0 3px 3px;*/
+/*	border-radius: 0 0 3px 3px;*/
+/*	list-style: none;*/
+/*	moz-box-shadow: 0 3px 5px rgba(0,0,0,.5);*/
+/*	webkit-box-shadow: 0 3px 5px rgba(0,0,0,.5);*/
+/*}*/
 
-.items li {
-	display: block;
-	margin: 0;
-	padding:0;
-}
+/*.items li {*/
+/*	display: block;*/
+/*	margin: 0;*/
+/*	padding:0;*/
+/*}*/
 
-.items li:first-child {
-	margin-top:0;
-}
+/*.items li:first-child {*/
+/*	margin-top:0;*/
+/*}*/
 
-.items li > a {
-	display: block;
-	padding: 1px 3px;
-	color: #000;
-	text-decoration: none;
-}
+/*.items li > a {*/
+/*	display: block;*/
+/*	padding: 1px 3px;*/
+/*	color: #000;*/
+/*	text-decoration: none;*/
+/*}*/
 
-.items li.hover > a {
-	background: #6F97BE;
-	color: #fcfcfc;
-}
+/*.items li.hover > a {*/
+/*	background: #6F97BE;*/
+/*	color: #fcfcfc;*/
+/*}*/
 
-.items li.selected a {
-	color: #fcfcfc;
-}
+/*.items li.selected a {*/
+/*	color: #fcfcfc;*/
+/*}*/
 
-.items .value { display: none; }
+/*.items .value { display: none; }*/
 
-.filters .filter .selectbox.value .display {
-	width: 290px;
-}
+/*.filters .filter .selectbox.value .display {*/
+/*	width: 290px;*/
+/*}*/
 
-.filters .default .selectbox.value .display {
-	width: 315px;
-}
+/*.filters .default .selectbox.value .display {*/
+/*	width: 315px;*/
+/*}*/
 
 .filters .filter input {
 	height: 22px;

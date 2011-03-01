@@ -19,7 +19,7 @@
 				$('.filters:first').hide();
 			}
 
-			$('.filters .filter select').sb();
+//			$('.filters .filter select').sb();
 
 			$('.filters .filter select.key, .filters .filter select.mode').each(function() {
 				Filtering.prepareSelectBox.apply(this);
@@ -128,14 +128,15 @@
 
 								select.find('option').each(function() {
 									if (data[index] && $(this).attr('value') == data[index].value) {
-										return $(this).attr('selected', true);
+										$(this).attr('selected', true);
+										return;
 									}
 								});
 							}
 
 							old.replaceWith(select);
-							parent.find('.selectbox.value:first').remove();
-							select.sb();
+//							parent.find('.selectbox.value:first').remove();
+//							select.sb();
 
 						}
 					});
@@ -151,7 +152,7 @@
 					});
 
 					old.replaceWith(input);
-					parent.find('.selectbox.value:first').remove();
+//					parent.find('.selectbox.value:first').remove();
 				}
 			}
 
