@@ -118,13 +118,19 @@
 
 						$sectionData = $sectionManager->fetch($e['source']);
 
-						$section = Widget::TableData(
-							Widget::Anchor(
-								$sectionData->get('name'),
-								URL . '/symphony/blueprints/sections/edit/' . $sectionData->get('id') . '/',
-								$sectionData->get('handle')
-							)
-						);
+						if ( $sectionData !== false ) {
+							
+							$section = Widget::TableData(
+								Widget::Anchor(
+									$sectionData->get('name'),
+									URL . '/symphony/blueprints/sections/edit/' . $sectionData->get('id') . '/',
+									$sectionData->get('handle')
+								)
+							);
+						}
+						else {
+							$section = Widget::TableData(__('Section not found.'), 'inactive');
+						}
 					}
 					else {
 						$name = Widget::TableData(
