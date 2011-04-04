@@ -1,8 +1,6 @@
 <?php
 
-	require_once(TOOLKIT . '/class.manager.php');
-
-	class PageManager extends Manager{
+	class PageManager {
 
 		public function listAll(){
 			$query = "SELECT `handle`, `title`

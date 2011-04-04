@@ -24,7 +24,9 @@
 }
 
 .filters .filter {
-	width: 510px;
+	float: left;
+	clear: left;
+	min-width: 510px;
 	height: 28px;
 	margin-bottom: 1.2em;
 	-webkit-border-radius: 3px;
@@ -54,13 +56,19 @@
 }
 
 .filters .filter select.mode {
-	margin-right: 8px;
+	margin: 0 8px 0 7px;
 }
 
-.filters .filter input {
+.filters .filter select.value {
+	width: 335px;
+	margin-left: 0;
+	margin-right: 4px;
+}
+
+.filters .filter input.value {
+	width: 324px;
 	height: 22px;
-	width: 310px;
-	margin: 2px 0 2px 3px;
+	margin: 2px 3px 2px 0;
 	padding: 0 5px;
 	border: 1px solid #CACACA;
 	-webkit-border-radius: 3px;
@@ -69,17 +77,19 @@
 	line-height: 22px;
 }
 
-.filters .filter input:focus {
+.filters .filter input.value:focus {
 	outline: none;
 	border: 1px solid #666;
 }
 
-.filters .default input {
-	width: 336px;
+.filters .default input.value {
+	width: 350px;
+	margin-right: 3px;
 }
 
-.filters select, .filters input {
-	margin-right: 4px;
+.filters .default select.value {
+	width: 360px;
+	margin-right: 5px;
 }
 
 .filters input.button {
@@ -104,7 +114,6 @@
 .filters .filter input.button {
 	position: relative;
 	top: 1px;
-	float: right;
 	width: 17px;
 	height: 16px;
 	margin: 5px 6px 0 0;
@@ -118,5 +127,7 @@
 }
 
 .filters input.apply {
+	clear: left;
+	display: block;
 	margin: 0.8em 0;
 }
