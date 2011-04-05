@@ -2,9 +2,9 @@
 
 Dinstinct index pages for events, datasources and utilities. Results are both sortable and filterable through a simple yet catchy interface.
 
-- Version: 0.5.1
+- Version: 0.5.2
 - Author: Simone Economo, my.ekoes@gmail.com
-- Build Date: 1st March 2011
+- Build Date: 05th April 2011
 - Requirements: Symphony CMS 2.1.0+
 
 ## Installation
@@ -19,5 +19,5 @@ _Note_: The latest version can alway be grabbed with `git clone git://github.com
 
  Extension version | Symphony version
  ----------------- | ----------------
- 0.5.1             | 2.2.x
+ 0.5.2             | 2.2.x
  0.5.0             | 2.1.x
