@@ -1,13 +1,8 @@
-.filtering {
-	position: relative;
-	left: -10px;
-}
-
 .filters {
 	overflow: hidden;
 	clear: both;
 	background: #353530 url(../../../symphony/assets/images/navigation.png) repeat-x 0px -95px;
-	margin: 1.5em 0 1.75em 0;
+	margin: 0 0 1.75em 0;
 	padding: 1em 19px;
 	vertical-align: middle;
 	border-top: 1px solid #e6e6e5;
@@ -21,12 +16,12 @@
 	background: #353530;
 	color: #f2f2f2;
 	text-shadow: #2B2B27 -1px 2px 2px;
+	margin-bottom: 0.5em;
 }
 
 .filters .filter {
 	float: left;
 	clear: left;
-	min-width: 510px;
 	height: 28px;
 	margin-bottom: 1.2em;
 	-webkit-border-radius: 3px;
@@ -47,6 +42,7 @@
 	-webkit-box-shadow: 1px 0 8px #2E2E2A, 1px 1px 8px #2E2E2A, 0 1px 8px #2E2E2A;
 	-moz-box-shadow: 1px 0 8px #2E2E2A, 1px 1px 8px #2E2E2A, 0 1px 8px #2E2E2A;
 	line-height: 30px;
+	white-space: nowrap;
 }
 
 .filters .filter select {
