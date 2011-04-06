@@ -4,7 +4,8 @@
 
 		public function listAll(){
 			$query = "SELECT `handle`, `title`
-			          FROM `tbl_pages`";
+			          FROM `tbl_pages`
+			          ORDER BY `sortorder` ASC";
 
 			$results = Symphony::Database()->fetch($query);
 
