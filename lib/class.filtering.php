@@ -294,7 +294,8 @@
 
 			$query = 'SELECT `id`, `title`
 			          FROM tbl_pages
-			          WHERE `data_sources` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
+			          WHERE `data_sources` = "' . $handle . '"
+			              OR `data_sources` REGEXP "^' . $handle . ',|,' . $handle . ',|,' . $handle . '$"';
 
 			$pages = Symphony::Database()->fetch($query);
 			$result = array();
@@ -315,7 +316,8 @@
 
 			$query = 'SELECT `id`, `title`
 			          FROM tbl_pages
-			          WHERE `events` REGEXP "' . $handle . ',|,' . $handle . ',|' . $handle . '$"';
+			          WHERE `events` = "' . $handle . '"
+			              OR `events` REGEXP "^' . $handle . ',|,' . $handle . ',|,' . $handle . '$"';
 
 			$pages = Symphony::Database()->fetch($query);
 			$result = array();
