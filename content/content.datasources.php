@@ -26,7 +26,6 @@
 			);
 
 			$this->addStylesheetToHead(URL . '/extensions/edui/assets/content.filters.css', 'screen', 80);
-			$this->addScriptToHead(URL . '/extensions/edui/assets/jquery.sb.min.js', 80);
 			$this->addScriptToHead(URL . '/extensions/edui/assets/content.filters.js', 80);
 
 			$datasourceManager = new DatasourceManager($this->_Parent);
@@ -241,7 +240,7 @@
 						redirect(Administration::instance()->getCurrentPageURL() . $string);
 					}
 					else {
-						$checked = @array_keys($_POST['items']);
+						$checked = ($_POST['items']) ? @array_keys($_POST['items']) : NULL;
 
 						if (is_array($checked) && !empty($checked)) {
 
