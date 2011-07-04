@@ -90,7 +90,7 @@
 				$pinSettting = array_reverse($pinSettting, true);
 				
 				// for all pinned DS
-				foreach ($pinSettting as $pinDS) {+
+				foreach ($pinSettting as $pinDS) {
 				
 					// get the data source key
 					$key = str_replace(' ', '_', strtolower(trim($pinDS, ' ') ) );
