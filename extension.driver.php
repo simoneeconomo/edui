@@ -1,11 +1,35 @@
 <?php
 
 	Class extension_edui extends Extension {
+		
+		/**
+		 * Name of the extension
+		 * @var string
+		 */
+		const EXT_NAME = 'Events, Datasources & Utilities Indexes';
+		
+		/**
+		 * Key of the pinned data source setting
+		 * @var string
+		 */
+		const SETTING_PINNED_DS = 'pinned-datasource';
+
+		/**
+		 * Key of the group of setting
+		 * @var string
+		 */
+		const SETTING_GROUP = 'edui';
+		
+		/**
+		 * private variable for holding the errors encountered when saving
+		 * @var array
+		 */
+		protected $errors = array();
 
 		public function about() {
 			return array(
-				'name'			=> 'Events, Datasources & Utilities Indexes',
-				'version'		=> '0.6.0',
+				'name'			=> self::EXT_NAME,
+				'version'		=> '0.6.1',
 				'release-date'	=> '2011-07-04',
 				'author' => array('name' => 'Simone Economo',
 					'website' => 'http://www.lineheight.net',
@@ -30,7 +54,7 @@
 					'location'	=> __('Blueprints'),
 					'name'	=> __('Utilities'),
 					'link'	=> '/utilities/'
-				),
+				)
 			);
 		}
 
@@ -46,6 +70,16 @@
 					'delegate' => 'AdminPagePreGenerate',
 					'callback' => 'setRedirects'
 				),
+				array(
+					'page'		=> '/system/preferences/',
+					'delegate'	=> 'AddCustomPreferenceFieldsets',
+					'callback'	=> 'addCustomPreferenceFieldsets'
+				),
+				array(
+					'page'      => '/system/preferences/',
+					'delegate'  => 'Save',
+					'callback'  => 'save'
+				)
 			);
 		}
 
@@ -120,6 +154,117 @@
 
 		}
 
+		
+		/**
+		 * Delegate handle that adds Custom Preference Fieldsets
+		 * @param string $page
+		 * @param array $context
+		 */
+		public function addCustomPreferenceFieldsets($context) {
+			// creates the field set
+			$fieldset = new XMLElement('fieldset');
+			$fieldset->setAttribute('class', 'settings');
+			$fieldset->appendChild(new XMLElement('legend', self::EXT_NAME));
+
+			// create a paragraph for short intructions
+			$p = new XMLElement('p', __('Define here options for EDUI extension'), array('class' => 'help'));
+
+			// append intro paragraph
+			$fieldset->appendChild($p);
+
+			// create a wrapper
+			$wrapper = new XMLElement('div');
+			//$wrapper->setAttribute('class', 'group');
+
+			// error wrapper
+			$err_wrapper = new XMLElement('div');
+
+			// append labels to field set
+			$wrapper->appendChild($this->generateField(self::SETTING_PINNED_DS, 'Pinned DS <em>seperated by ,</em>'));
+
+			// append field before errors
+			$err_wrapper->appendChild($wrapper);
+
+			// error management
+			if (count($this->errors) > 0) {
+				// set css and anchor
+				$err_wrapper->setAttribute('class', 'invalid');
+				$err_wrapper->setAttribute('id', 'error');
+
+				foreach ($this->errors as $error) {
+					// adds error message
+					$err = new XMLElement('p', $error);
+
+					// append to $wrapper
+					$err_wrapper->appendChild($err);
+				}
+			}
+
+			// wrapper into fieldset
+			$fieldset->appendChild($err_wrapper);
+
+			// adds the field set to the wrapper
+			$context['wrapper']->appendChild($fieldset);
+		}
+		
+		/**
+		 * Quick utility function to make a input field+label
+		 * @param string $settingName
+		 * @param string $textKey
+		 */
+		public function generateField($settingName, $textKey) {
+			// create the label and the input field
+			$label = Widget::Label();
+			$input = Widget::Input(
+						'settings[' . self::SETTING_GROUP . '][' . $settingName .']',
+						self::getConfigVal($settingName),
+						'text'
+					);
+
+			// set the input into the label
+			$label->setValue(__($textKey). ' ' . $input->generate());
+
+			return $label;
+		}
+		
+		/**
+		 *
+		 * Utility function that returns settings from this extensions settings group
+		 * @param string $key
+		 */
+		public static function getConfigVal($key) {
+			return Symphony::Configuration()->get($key, self::SETTING_GROUP);
+		}
+		
+		/**
+		 * Delegate handle that saves the preferences
+		 * Saves settings and cleans the database acconding to the new settings
+		 * @param array $context
+		 */
+		public function save($context){
+			$this->saveOne($context, self::SETTING_PINNED_DS, true);
+		}
+		
+		/**
+		 *
+		 * Save one parameter
+		 * @param array $context
+		 * @param string $key
+		 * @param string $autoSave @optional
+		 */
+		public function saveOne($context, $key, $autoSave=true){
+			// get the input
+			$input = $context['settings'][self::SETTING_GROUP][$key];
+
+			// set config                    (name, value, group)
+			Symphony::Configuration()->set($key, $input, self::SETTING_GROUP);
+
+			// save it
+			if ($autoSave) {
+				Administration::instance()->saveConfig();
+			}
+			
+		}
 	}
 	
 ?>

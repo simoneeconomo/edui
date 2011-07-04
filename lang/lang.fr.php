@@ -40,5 +40,14 @@
 
 		'Remove filter' => 
 		'Supprimer filtre',
+	
+		'Define here options for EDUI extension' =>
+		'Configuration pour l\'extension EDUI',
+	
+		'Pinned DS <em>seperated by ,</em>' =>
+		'Source de données épinglées <em>séparée par ,</em>',
+	
+		' <em>Pinned</em>' =>
+		' <em>Épinglé</em>'
 
 	);

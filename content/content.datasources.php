@@ -66,8 +66,8 @@
 			$this->addStylesheetToHead(URL . '/extensions/edui/assets/content.filters.css', 'screen', 80);
 			$this->addScriptToHead(URL . '/extensions/edui/assets/content.filters.js', 80);
 
-			$datasourceManager = new DatasourceManager($this->_Parent);
-			$sectionManager = new SectionManager($this->_Parent);
+			$datasourceManager = new DatasourceManager(Administration::instance());
+			$sectionManager = new SectionManager(Administration::instance());
 
 			$datasources = $datasourceManager->listAll();
 
@@ -79,6 +79,37 @@
 			/* Sorting */
 
 			$sorting = new Sorting($datasources, $sort, $order);
+			
+			/* Pinning */
+			$pinSettting = extension_edui::getConfigVal(extension_edui::SETTING_PINNED_DS);
+			$pinSettting = explode(',', $pinSettting);
+			
+			if (count($pinSettting) > 0) {
+				
+				// reverse the array to get them in order on the page
+				$pinSettting = array_reverse($pinSettting, true);
+				
+				// for all pinned DS
+				foreach ($pinSettting as $pinDS) {+
+				
+					// get the data source key
+					$key = str_replace(' ', '_', strtolower(trim($pinDS, ' ') ) );
+					
+					// does it exists ?
+					$res = array_key_exists($key , $datasources);
+					if ($res) {
+						// cache the current DS
+						$d = $datasources[$key];
+						// set as pinned
+						$d ['pinned'] = true;
+						// unset it
+						unset($datasources[$key]);
+						// prepend it to the begening of the list
+						array_unshift($datasources, $d);
+					}	
+				}
+						
+			}
 
 			/* Columns */
 
@@ -214,6 +245,10 @@
 					$author = Widget::TableData($author);
 					$author->appendChild(Widget::Input('items[' . $d['handle'] . ']', null, 'checkbox'));
 
+					if (isset($d['pinned']) && $d['pinned']) {
+						$name->appendChild(new XMLElement('span', __(' <em>Pinned</em>')));
+					}
+					
 					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $author), null);
 
 				}
