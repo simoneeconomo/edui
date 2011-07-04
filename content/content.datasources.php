@@ -10,9 +10,47 @@
 
 	class contentExtensionEduiDatasources extends AdministrationPage {
 		public $_errors;
+		
+		/**
+		 *
+		 * Flag to detect is site is multilingual
+		 * Must have the and extension installed and enabled
+		 * @var boolean
+		 */
+		private $isMultiLangual = false;
+		
+		/**
+		 * 
+		 * Private var to hold the current language
+		 * @var string
+		 */
+		private $lg = '';
 
 		public function __construct(&$parent){
 			parent::__construct($parent);
+			
+			// detect if multilangual field AND language redirect is enabled
+			$this->isMultiLangual =
+					(Symphony::ExtensionManager()->fetchStatus('page_lhandles') == EXTENSION_ENABLED &&
+					 Symphony::ExtensionManager()->fetchStatus('language_redirect') == EXTENSION_ENABLED);
+					 
+			// try to detect language
+			if ($this->isMultiLangual) {
+				
+				// add a ref to the Language redirect
+				if ($this->isMultiLangual) {
+					require_once (EXTENSIONS . '/language_redirect/lib/class.languageredirect.php');
+				}
+				
+				// current language
+				$this->lg = LanguageRedirect::instance()->getLanguageCode();
+				
+			}
+
+			// if not set, get it from the Symphony Backend
+			if (strlen($this->lg) < 0) {
+				$this->lg = Lang::get();
+			}
 		}
 
 		public function __viewIndex(){
@@ -200,8 +238,8 @@
 				array('delete', false, __('Delete'), 'confirm'),
 			);
 
-			$pageManager = new PageManager($this->_Parent);
-			$pages = $pageManager->listAll();
+			// get all pages in alpha order
+			$pages = $this->getHierarchy();
 
 			$group_link = array('label' => __('Link Page'), 'options' => array());
 			$group_unlink = array('label' => __('Unlink Page'), 'options' => array());
@@ -302,6 +340,115 @@
 					}
 				}
 
+			}
+		}
+
+		
+		/**
+		 *
+		 * Generate a "flat" view of the current page and ancestors
+		 * return array of all pages, starting with the current page
+		 */
+		private function getHierarchy() {
+			$flat = array();
+
+			$cols = "id, parent, title, handle";
+
+			if ($this->isMultiLangual && strlen($this->lg) > 0) {
+				// modify SQL query
+				$cols = "id, parent, page_lhandles_t_$lg as title, page_lhandles_h_$lg as handle";
+			}
+			
+			$pages = array();
+			
+			// get all pages
+			if (Symphony::Database()->query("SELECT $cols FROM `tbl_pages`")) {
+				$pages = Symphony::Database()->fetch();
+			}
+			
+			foreach ($pages as $page) {
+				
+				$pageTree = array();
+				
+				array_push($pageTree, $page);
+			
+				// try get all parents
+				$cid = (int) $page->parent;
+				
+				// while we still find parents
+				while ($cid > 0) {
+					
+					$pid = $cid;
+					
+					// search for prent in array
+					for ($i = 0; $i < count($pages) && $pid > 0; $i++) {
+						if ($pages[$i]->id == $cid) {
+							
+							array_push($pageTree, $pages[$i]);
+							
+							$cid = $subPage->parent;
+							$pid = -1;
+						}
+					}
+				}
+				
+				$this->buildPathAndTitle($pageTree);
+				
+				// add page in array
+				array_push($flat, get_object_vars($pageTree[0]));
+
+			}
+			
+			usort($flat, array( $this, 'compareTitles' ) );
+
+			return $flat;
+		}
+		
+		protected function compareTitles($a, $b) {
+			return strcasecmp ($a['title'], $b['title']);
+		}
+
+		/**
+		 *
+		 * Appends a new field, 'path' in each array in $flat and appends the parents page title to the current one
+		 * @param array $flat
+		 */
+		private function buildPathAndTitle(&$flat) {
+			$count = count($flat);
+
+			for ($i = 0; $i < $count; $i++) { // for each element
+
+				// pointer to the path to be build
+				$path = '';
+				$title = '';
+
+				for ($j = $i; $j < $count; $j++) { // iterate foward in order to build the path
+
+					// handle to be prepend
+					$handle = $flat[$j]->handle;
+
+					// if handle if not empty
+					if (strlen($handle) > 0) {
+						$path = $handle . '/' . $path;
+					}
+					
+					// new title
+					$title = $flat[$j]->title . ' - ' . $title;
+				}
+
+
+				if ($this->isMultiLangual && // then path starts with language Code
+					strlen($path) > 1 &&
+					strlen($this->lg) > 0) {
+
+					// prepand $lg
+					$path  = "$this->lg/" . $path;
+
+				}
+
+				// save path in array
+				$flat[$i]->path = trim($path, '/');
+				$flat[$i]->title = trim($title, ' - ');
 			}
 		}
 
