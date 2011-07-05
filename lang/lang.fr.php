@@ -48,6 +48,12 @@
 		'Source de données épinglées <em>séparée par ,</em>',
 	
 		' <em>Pinned</em>' =>
-		' <em>Épinglé</em>'
+		' <em>Épinglé</em>',
+	
+		'Pin' =>
+		'Épingler',
+	
+		'Unpin' =>
+		'Détacher '
 
 	);
