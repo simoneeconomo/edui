@@ -242,7 +242,7 @@
 		 * @param array $context
 		 */
 		public function save($context){
-			$this->saveOne($context, self::SETTING_PINNED_DS, true);
+			self::saveOne($context, self::SETTING_PINNED_DS, true);
 		}
 		
 		/**
@@ -252,7 +252,7 @@
 		 * @param string $key
 		 * @param string $autoSave @optional
 		 */
-		public function saveOne($context, $key, $autoSave=true){
+		public static function saveOne($context, $key, $autoSave=true){
 			// get the input
 			$input = $context['settings'][self::SETTING_GROUP][$key];
 

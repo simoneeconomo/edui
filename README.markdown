@@ -18,6 +18,7 @@ _Note_: The latest version can alway be grabbed with `git clone git://github.com
 ## Support
 
 - Supports multilangual sites
+- Supports Pinning the important DS: They will always be first in list. Pin them usign the "with-selected" menu
 
 ## Compatibility
 

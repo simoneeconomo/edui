@@ -95,18 +95,20 @@
 					// get the data source key
 					$key = str_replace(' ', '_', strtolower(trim($pinDS, ' ') ) );
 					
-					// does it exists ?
-					$res = array_key_exists($key , $datasources);
-					if ($res) {
-						// cache the current DS
-						$d = $datasources[$key];
-						// set as pinned
-						$d ['pinned'] = true;
-						// unset it
-						unset($datasources[$key]);
-						// prepend it to the begening of the list
-						array_unshift($datasources, $d);
-					}	
+					if (strlen($key) > 0) {
+						// does it exists ?
+						$res = array_key_exists($key , $datasources);
+						if ($res) {
+							// cache the current DS
+							$d = $datasources[$key];
+							// set as pinned
+							$d ['pinned'] = true;
+							// unset it
+							unset($datasources[$key]);
+							// prepend it to the begening of the list
+							array_unshift($datasources, $d);
+						}	
+					}
 				}
 						
 			}
@@ -270,7 +272,9 @@
 
 			$options = array(
 				array(NULL, false, __('With Selected...')),
-				array('delete', false, __('Delete'), 'confirm'),
+				array('pin', false, __('Pin')),
+				array('unpin', false, __('Unpin')),
+				array('delete', false, __('Delete'), 'confirm')
 			);
 
 			// get all pages in alpha order
@@ -329,6 +333,16 @@
 
 								if ($canProceed) redirect(Administration::instance()->getCurrentPageURL());
 							}
+							else if ($_POST['with-selected'] == 'pin') {
+								
+								$this->__pinDS($checked);
+								
+							}
+							else if ($_POST['with-selected'] == 'unpin') {
+								
+								$this->__unpinDS($checked);
+								
+							}
 							else if(preg_match('/^(?:un)?link-page-/', $_POST['with-selected'])) {
 								$pageManager = new PageManager();
 
@@ -376,6 +390,51 @@
 				}
 
 			}
+		}
+		
+		private function __pinDS($checked) {			
+			$newPins = '';
+			$pinSettting = extension_edui::getConfigVal(extension_edui::SETTING_PINNED_DS);
+			
+			foreach($checked as $handle) {
+				// if not already pinned
+				if (!strpos($pinSettting, $handle)) {
+					$newPins .= ', ' . $handle;
+				}
+			}
+			
+			$newPins = trim(trim($newPins, ','), ' ');
+			
+			if (strlen($pinSettting) > 0) {
+				$pinSettting .= ', ';
+			}
+			
+			$pinSettting .= $newPins;
+			
+			// save
+			// set config                    (name, value, group)
+			Symphony::Configuration()->set(extension_edui::SETTING_PINNED_DS, $pinSettting, extension_edui::SETTING_GROUP);
+			Administration::instance()->saveConfig();
+
+		}
+		
+		private function __unpinDS($checked) {
+			$pinSettting = extension_edui::getConfigVal(extension_edui::SETTING_PINNED_DS);
+			
+			foreach($checked as $handle) {
+				if (strpos($pinSettting, $handle) > -1) {
+					$pinSettting = str_replace($handle, '', $pinSettting);
+				}
+			}
+			
+			// clean up
+			$pinSettting = str_replace(', ,', ',', $pinSettting);
+			$pinSettting = str_replace(',,', ',', $pinSettting);
+			
+			// save
+			// set config                    (name, value, group)
+			Symphony::Configuration()->set(extension_edui::SETTING_PINNED_DS, $pinSettting, extension_edui::SETTING_GROUP);
+			Administration::instance()->saveConfig();
 		}
 
 		
