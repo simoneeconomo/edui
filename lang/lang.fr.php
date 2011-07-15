@@ -57,6 +57,9 @@
 		'Détacher',
 	
 		'Pinned Events <em>seperated by ,</em>' =>
-		'Événements épinglées <em>séparées par ,</em>'
+		'Événements épinglées <em>séparées par ,</em>',
+	
+		'Pinned Utilities <em>seperated by ,</em>' =>
+		'Utilitaires épinglées <em>séparées par ,</em>'
 
 	);

@@ -19,6 +19,12 @@
 		 * @var string
 		 */
 		const SETTING_PINNED_EV = 'pinned-events';
+		
+		/**
+		 * Key of the pinned utilities setting
+		 * @var string
+		 */
+		const SETTING_PINNED_UT = 'pinned-utilities';
 
 		/**
 		 * Key of the group of setting
@@ -197,6 +203,7 @@
 			// append labels to field set
 			$wrapper->appendChild($this->generateField(self::SETTING_PINNED_DS, 'Pinned DS <em>seperated by ,</em>'));
 			$wrapper->appendChild($this->generateField(self::SETTING_PINNED_EV, 'Pinned Events <em>seperated by ,</em>'));
+			$wrapper->appendChild($this->generateField(self::SETTING_PINNED_UT, 'Pinned Utilities <em>seperated by ,</em>'));
 
 			// append field before errors
 			$err_wrapper->appendChild($wrapper);
@@ -259,7 +266,8 @@
 		 */
 		public function save($context){
 			self::saveOne($context, self::SETTING_PINNED_DS, false);
-			self::saveOne($context, self::SETTING_PINNED_EV, true);
+			self::saveOne($context, self::SETTING_PINNED_EV, false);
+			self::saveOne($context, self::SETTING_PINNED_UT, true);
 		}
 		
 		/**

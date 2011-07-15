@@ -28,11 +28,12 @@
 			$this->Form->appendChild($filtering->displayFiltersPanel($events));
 
 			/* Sorting */
-
 			$sorting = new Sorting($events, $sort, $order);
+			
+			/* Pinning */
+			$this->pinElements(extension_edui::SETTING_PINNED_EV, &$events);
 
 			/* Columns */
-
 			$columns = array(
 				array(
 					'label' => __('Name'),
@@ -92,6 +93,8 @@
 			}
 			else{
 				$bOdd = true;
+				
+				//var_dump($events);die;
 
 				foreach($events as $e) {
 
@@ -160,6 +163,10 @@
 
 					$author = Widget::TableData($author);
 					$author->appendChild(Widget::Input('items[' . $e['handle'] . ']', null, 'checkbox'));
+					
+					if (isset($e['pinned']) && $e['pinned']) {
+						$name->appendChild($this->createPinnedNode());
+					}
 
 					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $author), null);
 
@@ -182,6 +189,8 @@
 
 			$options = array(
 				array(NULL, false, __('With Selected...')),
+				array('pin', false, __('Pin')),
+				array('unpin', false, __('Unpin')),
 				array('delete', false, __('Delete'), 'confirm'),
 			);
 
@@ -240,6 +249,16 @@
 								}
 
 								if ($canProceed) redirect(Administration::instance()->getCurrentPageURL());
+							}
+							else if ($_POST['with-selected'] == 'pin') {
+								
+								$this->__pin(extension_edui::SETTING_PINNED_EV, $checked);
+								
+							}
+							else if ($_POST['with-selected'] == 'unpin') {
+								
+								$this->__unpin(extension_edui::SETTING_PINNED_EV, $checked);
+								
 							}
 							else if(preg_match('/^(?:un)?link-page-/', $_POST['with-selected'])) {
 								$pageManager = new PageManager($this->_Parent);

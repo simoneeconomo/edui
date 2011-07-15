@@ -75,40 +75,9 @@
 			$sorting = new Sorting($datasources, $sort, $order);
 			
 			/* Pinning */
-			$pinSettting = extension_edui::getConfigVal(extension_edui::SETTING_PINNED_DS);
-			$pinSettting = explode(',', $pinSettting);
-			
-			if (count($pinSettting) > 0) {
-				
-				// reverse the array to get them in order on the page
-				$pinSettting = array_reverse($pinSettting, true);
-				
-				// for all pinned DS
-				foreach ($pinSettting as $pinDS) {
-				
-					// get the data source key
-					$key = str_replace(' ', '_', strtolower(trim($pinDS, ' ') ) );
-					
-					if (strlen($key) > 0) {
-						// does it exists ?
-						$res = array_key_exists($key , $datasources);
-						if ($res) {
-							// cache the current DS
-							$d = $datasources[$key];
-							// set as pinned
-							$d ['pinned'] = true;
-							// unset it
-							unset($datasources[$key]);
-							// prepend it to the begening of the list
-							array_unshift($datasources, $d);
-						}	
-					}
-				}
-						
-			}
+			$this->pinElements(extension_edui::SETTING_PINNED_DS, $datasources);
 
 			/* Columns */
-
 			$columns = array(
 				array(
 					'label' => __('Name'),
@@ -242,7 +211,7 @@
 					$author->appendChild(Widget::Input('items[' . $d['handle'] . ']', null, 'checkbox'));
 
 					if (isset($d['pinned']) && $d['pinned']) {
-						$name->appendChild(new XMLElement('span', __(' <em>Pinned</em>')));
+						$name->appendChild($this->createPinnedNode());
 					}
 					
 					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $author), null);
@@ -339,6 +308,7 @@
 								
 							}
 							else if(preg_match('/^(?:un)?link-page-/', $_POST['with-selected'])) {
+								$pageManager = new PageManager($this->_Parent);
 
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									$page = str_replace('unlink-page-', '', $_POST['with-selected']);

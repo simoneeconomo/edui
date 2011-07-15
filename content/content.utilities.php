@@ -4,6 +4,17 @@
 	
 	class contentExtensionEduiUtilities extends EDUIPage {
 
+		private function transformIntoArray($utilities) {
+			$r = array();
+			
+			foreach ($utilities as $k => $u) {
+				$r [$u] = array (
+					'name' => $u
+				);
+			}
+			
+			return $r;
+		}
 		
 		public function __viewIndex(){
 			$this->setPageType('table');	
@@ -12,6 +23,11 @@
 
 			$utilities = General::listStructure(UTILITIES, array('xsl'), false, 'asc', UTILITIES);
 			$utilities = $utilities['filelist'];
+			
+			$utilities = $this->transformIntoArray($utilities);
+			
+			/* Pinning */
+			$this->pinElements(extension_edui::SETTING_PINNED_UT, $utilities);
 
 			$aTableHead = array(
 
@@ -30,15 +46,21 @@
 			else{
 				
 				$bOdd = true;
+				
+				//var_dump($utilities);die;
 
 				foreach($utilities as $u) {
 					$name = Widget::TableData(
 						Widget::Anchor(
-							$u,
+							$u['name'],
 							URL . '/symphony/blueprints/utilities/edit/' . str_replace('.xsl', '', $u) . '/')
 					);
 
-					$name->appendChild(Widget::Input('items[' . $u . ']', null, 'checkbox'));
+					$name->appendChild(Widget::Input('items[' . $u['name'] . ']', null, 'checkbox'));
+					
+					if (isset($u['pinned']) && $u['pinned']) {
+						$name->appendChild($this->createPinnedNode());
+					}
 
 					$aTableBody[] = Widget::TableRow(array($name), null);
 				}
@@ -58,6 +80,8 @@
 			
 			$options = array(
 				array(NULL, false, __('With Selected...')),
+				array('pin', false, __('Pin')),
+				array('unpin', false, __('Unpin')),
 				array('delete', false, __('Delete'), 'confirm'),
 			);
 
@@ -84,6 +108,17 @@
 
 						if ($canProceed) redirect(Administration::instance()->getCurrentPageURL());
 						break;
+						
+				case 'pin':
+								
+					$this->__pin(extension_edui::SETTING_PINNED_UT, $checked);
+					break;
+
+				case 'unpin':
+								
+					$this->__unpin(extension_edui::SETTING_PINNED_UT, $checked);
+					break;
+								
 				}
 			}
 

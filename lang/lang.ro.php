@@ -51,6 +51,9 @@
 		false,
 		
 		'Pinned Events <em>seperated by ,</em>' =>
+		false,
+		
+		'Pinned Utilities <em>seperated by ,</em>' =>
 		false
 
 	);

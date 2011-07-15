@@ -74,6 +74,41 @@
 			}
 		}
 		
+		protected function pinElements($settingKey, array &$elements) {
+			$pinSettting = extension_edui::getConfigVal($settingKey);
+			$pinSettting = explode(',', $pinSettting);
+			
+			//var_dump($elements);
+			//die();
+			
+			if (count($pinSettting) > 0) {
+				
+				// reverse the array to get them in order on the page
+				$pinSettting = array_reverse($pinSettting, true);
+				
+				// for all pinned elements
+				foreach ($pinSettting as $pinned) {
+				
+					// get the key
+					$key = str_replace(' ', '_', strtolower(trim($pinned, ' ') ) );
+					
+					if (strlen($key) > 0) {
+						// does it exists ?
+						if (array_key_exists($key, $elements)) {
+							// cache the current element
+							$e = $elements[$key];
+							// set as pinned
+							$e ['pinned'] = true;
+							// unset it
+							unset($elements[$key]);
+							// prepend it to the begening of the list
+							array_unshift($elements, $e);
+						}	
+					}
+				}
+						
+			}
+		}
 		
 		protected function __pin($settingKey, $checked) {			
 			$newPins = '';
@@ -118,6 +153,10 @@
 			// set config                    (name, value, group)
 			Symphony::Configuration()->set($settingKey, $pinSettting, extension_edui::SETTING_GROUP);
 			Administration::instance()->saveConfig();
+		}
+		
+		protected function createPinnedNode() {
+			return new XMLElement('span', __(' <em>Pinned</em>'));
 		}
 		
 	}
