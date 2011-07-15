@@ -46,8 +46,6 @@
 			else{
 				
 				$bOdd = true;
-				
-				//var_dump($utilities);die;
 
 				foreach($utilities as $u) {
 					$name = Widget::TableData(

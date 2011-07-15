@@ -147,6 +147,7 @@
 			
 			// clean up
 			$pinSettting = str_replace(', ,', ',', $pinSettting);
+			$pinSettting = str_replace('  ', ' ', $pinSettting);
 			$pinSettting = str_replace(',,', ',', $pinSettting);
 			
 			// save

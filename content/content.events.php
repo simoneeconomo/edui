@@ -23,7 +23,6 @@
 			$events = $eventManager->listAll();
 
 			/* Filtering */
-
 			$filtering = new EventsFiltering();
 			$this->Form->appendChild($filtering->displayFiltersPanel($events));
 
@@ -93,8 +92,6 @@
 			}
 			else{
 				$bOdd = true;
-				
-				//var_dump($events);die;
 
 				foreach($events as $e) {
 

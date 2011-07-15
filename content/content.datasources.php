@@ -3,49 +3,6 @@
 	require_once(EXTENSIONS . '/edui/lib/class.EDUIPage.php');
 
 	class contentExtensionEduiDatasources extends EDUIPage {
-		public $_errors;
-		
-		/**
-		 *
-		 * Flag to detect is site is multilingual
-		 * Must have the and extension installed and enabled
-		 * @var boolean
-		 */
-		private $isMultiLangual = false;
-		
-		/**
-		 * 
-		 * Private var to hold the current language
-		 * @var string
-		 */
-		private $lg = '';
-
-		public function __construct(&$parent){
-			parent::__construct($parent);
-			
-			// detect if multilangual field AND language redirect is enabled
-			$this->isMultiLangual =
-					(Symphony::ExtensionManager()->fetchStatus('page_lhandles') == EXTENSION_ENABLED &&
-					 Symphony::ExtensionManager()->fetchStatus('language_redirect') == EXTENSION_ENABLED);
-					 
-			// try to detect language
-			if ($this->isMultiLangual) {
-				
-				// add a ref to the Language redirect
-				if ($this->isMultiLangual) {
-					require_once (EXTENSIONS . '/language_redirect/lib/class.languageredirect.php');
-				}
-				
-				// current language
-				$this->lg = LanguageRedirect::instance()->getLanguageCode();
-				
-			}
-
-			// if not set, get it from the Symphony Backend
-			if (strlen($this->lg) < 0) {
-				$this->lg = Lang::get();
-			}
-		}
 
 		public function __viewIndex(){
 			$this->setPageType('table');
@@ -66,12 +23,10 @@
 			$datasources = $datasourceManager->listAll();
 
 			/* Filtering */
-
 			$filtering = new DatasourcesFiltering();
 			$this->Form->appendChild($filtering->displayFiltersPanel($datasources));
 
 			/* Sorting */
-
 			$sorting = new Sorting($datasources, $sort, $order);
 			
 			/* Pinning */
