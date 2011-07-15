@@ -1,14 +1,8 @@
 <?php
 
-	require_once(TOOLKIT . '/class.administrationpage.php');
-	require_once(TOOLKIT . '/class.sectionmanager.php');
-	require_once(TOOLKIT . '/class.datasourcemanager.php');
+	require_once(EXTENSIONS . '/edui/lib/class.EDUIPage.php');
 
-	require_once(EXTENSIONS . '/edui/lib/class.sorting.php');
-	require_once(EXTENSIONS . '/edui/lib/class.filtering.php');
-	require_once(EXTENSIONS . '/edui/lib/class.pagemanager.php');
-
-	class contentExtensionEduiDatasources extends AdministrationPage {
+	class contentExtensionEduiDatasources extends EDUIPage {
 		public $_errors;
 		
 		/**
@@ -278,7 +272,8 @@
 			);
 
 			// get all pages in alpha order
-			$pages = $this->getHierarchy();
+			$pageManager = new PageManager($this->_Parent);
+			$pages = $pageManager->getHierarchy();
 
 			$group_link = array('label' => __('Link Page'), 'options' => array());
 			$group_unlink = array('label' => __('Unlink Page'), 'options' => array());
@@ -287,8 +282,8 @@
 			$group_unlink['options'][] = array('unlink-all-pages', false, __('All'));
 
 			foreach($pages as $p) {
-				$group_link['options'][] = array('link-page-' . $p['handle'], false, $p['title']);
-				$group_unlink['options'][] = array('unlink-page-' . $p['handle'], false, $p['title']);
+				$group_link['options'][] = array('link-page-' . $p['id'], false, $p['title']);
+				$group_unlink['options'][] = array('unlink-page-' . $p['id'], false, $p['title']);
 			}
 
 			$options[] = $group_link;
@@ -335,16 +330,15 @@
 							}
 							else if ($_POST['with-selected'] == 'pin') {
 								
-								$this->__pinDS($checked);
+								$this->__pin(extension_edui::SETTING_PINNED_DS, $checked);
 								
 							}
 							else if ($_POST['with-selected'] == 'unpin') {
 								
-								$this->__unpinDS($checked);
+								$this->__unpin(extension_edui::SETTING_PINNED_DS, $checked);
 								
 							}
 							else if(preg_match('/^(?:un)?link-page-/', $_POST['with-selected'])) {
-								$pageManager = new PageManager();
 
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									$page = str_replace('unlink-page-', '', $_POST['with-selected']);
@@ -364,20 +358,21 @@
 								redirect(Administration::instance()->getCurrentPageURL());
 							}
 							else if(preg_match('/^(?:un)?link-all-pages$/', $_POST['with-selected'])) {
-								$pageManager = new PageManager();
+								
+								$pageManager = new PageManager($this->_Parent);
 								$pages = $pageManager->listAll();
 
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->unlinkDatasource($handle, $page['handle']);
+											$pageManager->unlinkDatasource($handle, $page['id']);
 										}
 									}
 								}
 								else {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->linkDatasource($handle, $page['handle']);
+											$pageManager->linkDatasource($handle, $page['id']);
 										}
 									}
 								}
@@ -392,159 +387,6 @@
 			}
 		}
 		
-		private function __pinDS($checked) {			
-			$newPins = '';
-			$pinSettting = extension_edui::getConfigVal(extension_edui::SETTING_PINNED_DS);
-			
-			foreach($checked as $handle) {
-				// if not already pinned
-				if (!strpos($pinSettting, $handle)) {
-					$newPins .= ', ' . $handle;
-				}
-			}
-			
-			$newPins = trim(trim($newPins, ','), ' ');
-			
-			if (strlen($pinSettting) > 0) {
-				$pinSettting .= ', ';
-			}
-			
-			$pinSettting .= $newPins;
-			
-			// save
-			// set config                    (name, value, group)
-			Symphony::Configuration()->set(extension_edui::SETTING_PINNED_DS, $pinSettting, extension_edui::SETTING_GROUP);
-			Administration::instance()->saveConfig();
-
-		}
-		
-		private function __unpinDS($checked) {
-			$pinSettting = extension_edui::getConfigVal(extension_edui::SETTING_PINNED_DS);
-			
-			foreach($checked as $handle) {
-				if (strpos($pinSettting, $handle) > -1) {
-					$pinSettting = str_replace($handle, '', $pinSettting);
-				}
-			}
-			
-			// clean up
-			$pinSettting = str_replace(', ,', ',', $pinSettting);
-			$pinSettting = str_replace(',,', ',', $pinSettting);
-			
-			// save
-			// set config                    (name, value, group)
-			Symphony::Configuration()->set(extension_edui::SETTING_PINNED_DS, $pinSettting, extension_edui::SETTING_GROUP);
-			Administration::instance()->saveConfig();
-		}
-
-		
-		/**
-		 *
-		 * Generate a "flat" view of the current page and ancestors
-		 * return array of all pages, starting with the current page
-		 */
-		private function getHierarchy() {
-			$flat = array();
-
-			$cols = "id, parent, title, handle";
-
-			if ($this->isMultiLangual && strlen($this->lg) > 0) {
-				// modify SQL query
-				$cols = "id, parent, page_lhandles_t_$lg as title, page_lhandles_h_$lg as handle";
-			}
-			
-			$pages = array();
-			
-			// get all pages
-			if (Symphony::Database()->query("SELECT $cols FROM `tbl_pages`")) {
-				$pages = Symphony::Database()->fetch();
-			}
-			
-			foreach ($pages as $page) {
-				
-				$pageTree = array();
-				
-				array_push($pageTree, $page);
-			
-				// try get all parents
-				$cid = (int) $page->parent;
-				
-				// while we still find parents
-				while ($cid > 0) {
-					
-					$pid = $cid;
-					
-					// search for prent in array
-					for ($i = 0; $i < count($pages) && $pid > 0; $i++) {
-						if ($pages[$i]->id == $cid) {
-							
-							array_push($pageTree, $pages[$i]);
-							
-							$cid = $subPage->parent;
-							$pid = -1;
-						}
-					}
-				}
-				
-				$this->buildPathAndTitle($pageTree);
-				
-				// add page in array
-				array_push($flat, get_object_vars($pageTree[0]));
-
-			}
-			
-			usort($flat, array( $this, 'compareTitles' ) );
-
-			return $flat;
-		}
-		
-		protected function compareTitles($a, $b) {
-			return strcasecmp ($a['title'], $b['title']);
-		}
-
-		/**
-		 *
-		 * Appends a new field, 'path' in each array in $flat and appends the parents page title to the current one
-		 * @param array $flat
-		 */
-		private function buildPathAndTitle(&$flat) {
-			$count = count($flat);
-
-			for ($i = 0; $i < $count; $i++) { // for each element
-
-				// pointer to the path to be build
-				$path = '';
-				$title = '';
-
-				for ($j = $i; $j < $count; $j++) { // iterate foward in order to build the path
-
-					// handle to be prepend
-					$handle = $flat[$j]->handle;
-
-					// if handle if not empty
-					if (strlen($handle) > 0) {
-						$path = $handle . '/' . $path;
-					}
-					
-					// new title
-					$title = $flat[$j]->title . ' - ' . $title;
-				}
-
-
-				if ($this->isMultiLangual && // then path starts with language Code
-					strlen($path) > 1 &&
-					strlen($this->lg) > 0) {
-
-					// prepand $lg
-					$path  = "$this->lg/" . $path;
-
-				}
-
-				// save path in array
-				$flat[$i]->path = trim($path, '/');
-				$flat[$i]->title = trim($title, ' - ');
-			}
-		}
 
 	}
 	

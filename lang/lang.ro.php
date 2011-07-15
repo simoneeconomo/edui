@@ -48,6 +48,9 @@
 		false,
 		
 		' <em>Pinned</em>' =>
+		false,
+		
+		'Pinned Events <em>seperated by ,</em>' =>
 		false
 
 	);

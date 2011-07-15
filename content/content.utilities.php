@@ -1,13 +1,9 @@
 <?php
 
-	require_once(TOOLKIT . '/class.administrationpage.php');
+	require_once(EXTENSIONS . '/edui/lib/class.EDUIPage.php');
 	
-	class contentExtensionEduiUtilities extends AdministrationPage {
-		public $_errors;
-		
-		public function __construct(&$parent){
-			parent::__construct($parent);
-		}
+	class contentExtensionEduiUtilities extends EDUIPage {
+
 		
 		public function __viewIndex(){
 			$this->setPageType('table');	

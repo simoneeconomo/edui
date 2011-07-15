@@ -1,19 +1,8 @@
 <?php
 
-	require_once(TOOLKIT . '/class.administrationpage.php');
-	require_once(TOOLKIT . '/class.sectionmanager.php');
-	require_once(TOOLKIT . '/class.eventmanager.php');
+	require_once(EXTENSIONS . '/edui/lib/class.EDUIPage.php');
 
-	require_once(EXTENSIONS . '/edui/lib/class.sorting.php');
-	require_once(EXTENSIONS . '/edui/lib/class.filtering.php');
-	require_once(EXTENSIONS . '/edui/lib/class.pagemanager.php');
-
-	class contentExtensionEduiEvents extends AdministrationPage {
-		public $_errors;
-
-		public function __construct(&$parent){
-			parent::__construct($parent);
-		}
+	class contentExtensionEduiEvents extends EDUIPage {
 
 		public function __viewIndex(){
 			$this->setPageType('table');
@@ -197,7 +186,7 @@
 			);
 
 			$pageManager = new PageManager($this->_Parent);
-			$pages = $pageManager->listAll();
+			$pages = $pageManager->getHierarchy();
 
 			$group_link = array('label' => __('Link Page'), 'options' => array());
 			$group_unlink = array('label' => __('Unlink Page'), 'options' => array());
@@ -206,8 +195,8 @@
 			$group_unlink['options'][] = array('unlink-all-pages', false, __('All'));
 
 			foreach($pages as $p) {
-				$group_link['options'][] = array('link-page-' . $p['handle'], false, $p['title']);
-				$group_unlink['options'][] = array('unlink-page-' . $p['handle'], false, $p['title']);
+				$group_link['options'][] = array('link-page-' . $p['id'], false, $p['title']);
+				$group_unlink['options'][] = array('unlink-page-' . $p['id'], false, $p['title']);
 			}
 
 			$options[] = $group_link;
@@ -253,7 +242,7 @@
 								if ($canProceed) redirect(Administration::instance()->getCurrentPageURL());
 							}
 							else if(preg_match('/^(?:un)?link-page-/', $_POST['with-selected'])) {
-								$pageManager = new PageManager();
+								$pageManager = new PageManager($this->_Parent);
 
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									$page = str_replace('unlink-page-', '', $_POST['with-selected']);
@@ -273,20 +262,20 @@
 								redirect(Administration::instance()->getCurrentPageURL());
 							}
 							else if(preg_match('/^(?:un)?link-all-pages$/', $_POST['with-selected'])) {
-								$pageManager = new PageManager();
+								$pageManager = new PageManager($this->_Parent);
 								$pages = $pageManager->listAll();
 
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->unlinkEvent($handle, $page['handle']);
+											$pageManager->unlinkEvent($handle, $page['id']);
 										}
 									}
 								}
 								else {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->linkEvent($handle, $page['handle']);
+											$pageManager->linkEvent($handle, $page['id']);
 										}
 									}
 								}

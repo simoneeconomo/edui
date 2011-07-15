@@ -13,6 +13,12 @@
 		 * @var string
 		 */
 		const SETTING_PINNED_DS = 'pinned-datasource';
+		
+		/**
+		 * Key of the pinned events setting
+		 * @var string
+		 */
+		const SETTING_PINNED_EV = 'pinned-events';
 
 		/**
 		 * Key of the group of setting
@@ -29,11 +35,20 @@
 		public function about() {
 			return array(
 				'name'			=> self::EXT_NAME,
-				'version'		=> '0.6.1',
-				'release-date'	=> '2011-07-04',
-				'author' => array('name' => 'Simone Economo',
-					'website' => 'http://www.lineheight.net',
-					'email' => 'my.ekoes@gmail.com'),
+				'version'		=> '0.7',
+				'release-date'	=> '2011-07-15',
+				'author' 		=> array(
+						array(
+							'name' 			=> 'Simone Economo',
+							'website' 		=> 'http://www.lineheight.net',
+							'email' 		=> 'my.ekoes@gmail.com'
+						),
+						array(
+							'name'			=> 'Solutions Nitriques',
+							'website'		=> 'http://www.nitriques.com/open-source/',
+							'email'			=> 'open-source (at) nitriques.com'
+						)
+					),
 				'description'	=> 'Dinstinct index pages for events, datasources and utilities.'
 			);
 		}
@@ -181,6 +196,7 @@
 
 			// append labels to field set
 			$wrapper->appendChild($this->generateField(self::SETTING_PINNED_DS, 'Pinned DS <em>seperated by ,</em>'));
+			$wrapper->appendChild($this->generateField(self::SETTING_PINNED_EV, 'Pinned Events <em>seperated by ,</em>'));
 
 			// append field before errors
 			$err_wrapper->appendChild($wrapper);
@@ -242,7 +258,8 @@
 		 * @param array $context
 		 */
 		public function save($context){
-			self::saveOne($context, self::SETTING_PINNED_DS, true);
+			self::saveOne($context, self::SETTING_PINNED_DS, false);
+			self::saveOne($context, self::SETTING_PINNED_EV, true);
 		}
 		
 		/**

@@ -45,7 +45,7 @@
 		'Configuration pour l\'extension EDUI',
 	
 		'Pinned DS <em>seperated by ,</em>' =>
-		'Source de données épinglées <em>séparée par ,</em>',
+		'Source de données épinglées <em>séparées par ,</em>',
 	
 		' <em>Pinned</em>' =>
 		' <em>Épinglé</em>',
@@ -54,6 +54,9 @@
 		'Épingler',
 	
 		'Unpin' =>
-		'Détacher '
+		'Détacher',
+	
+		'Pinned Events <em>seperated by ,</em>' =>
+		'Événements épinglées <em>séparées par ,</em>'
 
 	);
