@@ -23,7 +23,14 @@
 				$result = $results[0][$field];
 
 				if (!in_array($r_handle, explode(',', $result))) {
-					$result .= "," . $r_handle;
+					
+					// add only if requiered
+					if (strlen($result) > 0) {
+						$result .= ",";
+					}
+					
+					// append new ressource
+					$result .= $r_handle;
 
 					$query = "UPDATE `tbl_pages`
 					          SET `$field` = '" . MySQL::cleanValue($result) . "'
@@ -43,10 +50,24 @@
 
 			if (is_array($results) && count($results) == 1) {
 				$result = $results[0][$field];
+				
+				$ex_result = explode(',', $result);
+				
+				$idx = array_search($r_handle, $ex_result, false);
 
-				if (in_array($r_handle, explode(',', $result))) {
-					$result = str_replace($r_handle, '', $result);
-					$result = str_replace(',,', ',', $result);
+				if ($idx != FALSE) {
+					
+					// Do not use str_replace since this may replace some good infos.
+					// ex.: When unlinking DS videos, another DS named video_2
+					//      will be transform into _2, which breaks the front end
+					//$result = str_replace($r_handle, '', $result);
+					//$result = str_replace(',,', ',', $result);
+					
+					// remove the element from the array
+					array_splice($ex_result, $idx, 1);
+					
+					// get the string back
+					$result = implode(',', $ex_result);
 
 					$query = "UPDATE `tbl_pages`
 					          SET `$field` = '" . MySQL::cleanValue($result) . "'
