@@ -21,6 +21,9 @@
 			$this->setTitle(__('%1$s &ndash; %2$s', array(__('Symphony'), __('Utilities'))));
 			$this->appendSubheading(__('Utilities'), Widget::Anchor(__('Create New'), URL . '/symphony/blueprints/utilities/new/', __('Create a new utility'), 'create button'));
 
+			
+			$this->registerPinClientRessource();
+			
 			$utilities = General::listStructure(UTILITIES, array('xsl'), false, 'asc', UTILITIES);
 			$utilities = $utilities['filelist'];
 			
@@ -30,7 +33,7 @@
 			$this->pinElements(extension_edui::SETTING_PINNED_UT, $utilities);
 
 			$aTableHead = array(
-
+				array(__('Pin'), 'col', array('style'=>'width:40px')),
 				array(__('Name'), 'col'),
 			);
 
@@ -56,11 +59,9 @@
 
 					$name->appendChild(Widget::Input('items[' . $u['name'] . ']', null, 'checkbox'));
 					
-					if (isset($u['pinned']) && $u['pinned']) {
-						$name->appendChild($this->createPinnedNode());
-					}
+					$pin_ele = $this->createPinNode($u);
 
-					$aTableBody[] = Widget::TableRow(array($name), null);
+					$aTableBody[] = Widget::TableRow(array($pin_ele, $name), null);
 				}
 			}
 

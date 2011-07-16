@@ -74,6 +74,16 @@
 			}
 		}
 		
+		protected function registerClientRessources() {
+			$this->addStylesheetToHead(URL . '/extensions/edui/assets/content.filters.css', 'screen', 80);
+			$this->addScriptToHead(URL . '/extensions/edui/assets/content.filters.js', 80);
+			$this->registerPinClientRessource();
+		}
+		
+		protected function registerPinClientRessource() {
+			$this->addScriptToHead(URL . '/extensions/edui/assets/content.pin.js', 80);
+		}
+		
 		protected function pinElements($settingKey, array &$elements) {
 			$pinSettting = extension_edui::getConfigVal($settingKey);
 			$pinSettting = explode(',', $pinSettting);
@@ -90,11 +100,11 @@
 				foreach ($pinSettting as $pinned) {
 				
 					// get the key
-					$key = str_replace(' ', '_', strtolower(trim($pinned, ' ') ) );
+					$key = str_replace(' ', '_', strtolower(trim($pinned)));
 					
 					if (strlen($key) > 0) {
 						// does it exists ?
-						if (array_key_exists($key, $elements)) {
+						if (@array_key_exists($key, $elements)) {
 							// cache the current element
 							$e = $elements[$key];
 							// set as pinned
@@ -116,7 +126,8 @@
 			
 			foreach($checked as $handle) {
 				// if not already pinned
-				if (!strpos($pinSettting, $handle)) {
+				// 0 !== FALSE but 0 == FALSE
+				if (strpos($pinSettting, $handle) === FALSE) {
 					$newPins .= ', ' . $handle;
 				}
 			}
@@ -124,7 +135,7 @@
 			$newPins = trim(trim($newPins, ','), ' ');
 			
 			if (strlen($pinSettting) > 0) {
-				$pinSettting .= ', ';
+				$pinSettting .= ',';
 			}
 			
 			$pinSettting .= $newPins;
@@ -133,22 +144,38 @@
 			// set config                    (name, value, group)
 			Symphony::Configuration()->set($settingKey, $pinSettting, extension_edui::SETTING_GROUP);
 			Administration::instance()->saveConfig();
-
 		}
 		
 		protected function __unpin($settingKey, $checked) {
 			$pinSettting = extension_edui::getConfigVal($settingKey);
 			
+			$ex_pinSettting = explode(',', $pinSettting);
+			
+			//clean up
+			$x = 0;
+			foreach ($ex_pinSettting as $pinSet) {
+				$pinSet = str_replace(' ', '', trim($pinSet));
+				
+				if (strlen($pinSet) > 0) {
+					$ex_pinSettting[$x] = $pinSet;
+					$x++;
+				} else {
+					array_splice($ex_pinSettting, $x, 1);
+				}
+			}
+
 			foreach($checked as $handle) {
-				if (strpos($pinSettting, $handle) > -1) {
-					$pinSettting = str_replace($handle, '', $pinSettting);
+
+				$idx = array_search($handle, $ex_pinSettting, false);
+				
+				// (0 != FALSE) -> false
+				// (0 !== FALSE) -> true
+				if ($idx !== FALSE) {
+					array_splice($ex_pinSettting, $idx, 1);
 				}
 			}
 			
-			// clean up
-			$pinSettting = str_replace(', ,', ',', $pinSettting);
-			$pinSettting = str_replace('  ', ' ', $pinSettting);
-			$pinSettting = str_replace(',,', ',', $pinSettting);
+			$pinSettting = implode(',', $ex_pinSettting);
 			
 			// save
 			// set config                    (name, value, group)
@@ -156,8 +183,23 @@
 			Administration::instance()->saveConfig();
 		}
 		
-		protected function createPinnedNode() {
-			return new XMLElement('span', __(' <em>Pinned</em>'));
+		protected function createPinNode($data) {
+			$img = new XMLElement('img');
+			
+			$img->setAttribute('style', 'cursor: pointer;');
+			
+			if (isset($data['pinned']) && $data['pinned']) {
+				$img->setAttribute('src', URL . '/extensions/edui/assets/images/unpin.gif');
+				$img->setAttribute('class', 'pin unpin');
+			} else {
+				$img->setAttribute('src', URL . '/extensions/edui/assets/images/pin.gif');
+				$img->setAttribute('class', 'pin');
+			}
+			
+			return Widget::TableData( $img );
+			
 		}
+		
+		
 		
 	}

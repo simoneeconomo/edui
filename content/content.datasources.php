@@ -14,8 +14,7 @@
 				Widget::Anchor(__('Create New'), URL . '/symphony/blueprints/datasources/new/', __('Create a new data source'), 'create button')
 			);
 
-			$this->addStylesheetToHead(URL . '/extensions/edui/assets/content.filters.css', 'screen', 80);
-			$this->addScriptToHead(URL . '/extensions/edui/assets/content.filters.js', 80);
+			$this->registerClientRessources();
 
 			$datasourceManager = new DatasourceManager(Administration::instance());
 			$sectionManager = new SectionManager(Administration::instance());
@@ -34,6 +33,10 @@
 
 			/* Columns */
 			$columns = array(
+				array(
+					'label' => __('Pin'),
+					'sortable' => false
+				),
 				array(
 					'label' => __('Name'),
 					'sortable' => true
@@ -164,12 +167,10 @@
 
 					$author = Widget::TableData($author);
 					$author->appendChild(Widget::Input('items[' . $d['handle'] . ']', null, 'checkbox'));
-
-					if (isset($d['pinned']) && $d['pinned']) {
-						$name->appendChild($this->createPinnedNode());
-					}
 					
-					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $author), null);
+					$pin_ele = $this->createPinNode($d);
+					
+					$aTableBody[] = Widget::TableRow(array($pin_ele, $name, $section, $pagelinks, $author), null);
 
 				}
 			}

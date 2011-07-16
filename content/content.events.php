@@ -14,8 +14,7 @@
 				Widget::Anchor(__('Create New'), URL . '/symphony/blueprints/events/new/', __('Create a new event'), 'create button')
 			);
 
-			$this->addStylesheetToHead(URL . '/extensions/edui/assets/content.filters.css', 'screen', 80);
-			$this->addScriptToHead(URL . '/extensions/edui/assets/content.filters.js', 80);
+			$this->registerClientRessources();
 
 			$eventManager = new EventManager($this->_Parent);
 			$sectionManager = new SectionManager($this->_Parent);
@@ -34,6 +33,10 @@
 
 			/* Columns */
 			$columns = array(
+				array(
+					'label' => __('Pin'),
+					'sortable' => false
+				),
 				array(
 					'label' => __('Name'),
 					'sortable' => true
@@ -161,11 +164,9 @@
 					$author = Widget::TableData($author);
 					$author->appendChild(Widget::Input('items[' . $e['handle'] . ']', null, 'checkbox'));
 					
-					if (isset($e['pinned']) && $e['pinned']) {
-						$name->appendChild($this->createPinnedNode());
-					}
+					$pin_ele = $this->createPinNode($e);
 
-					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $author), null);
+					$aTableBody[] = Widget::TableRow(array($pin_ele, $name, $section, $pagelinks, $author), null);
 
 				}
 			}
