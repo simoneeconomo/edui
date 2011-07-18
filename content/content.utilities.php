@@ -54,7 +54,7 @@
 					$name = Widget::TableData(
 						Widget::Anchor(
 							$u['name'],
-							URL . '/symphony/blueprints/utilities/edit/' . str_replace('.xsl', '', $u) . '/')
+							URL . '/symphony/blueprints/utilities/edit/' . str_replace('.xsl', '', $u['name']) . '/')
 					);
 
 					$name->appendChild(Widget::Input('items[' . $u['name'] . ']', null, 'checkbox'));

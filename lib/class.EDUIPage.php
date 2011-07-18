@@ -84,12 +84,15 @@
 			$this->addScriptToHead(URL . '/extensions/edui/assets/content.pin.js', 80);
 		}
 		
+		/**
+		 * 
+		 * Method that moves pinned element at the beginning of the array
+		 * @param string $settingKey
+		 * @param array $elements
+		 */
 		protected function pinElements($settingKey, array &$elements) {
 			$pinSettting = extension_edui::getConfigVal($settingKey);
 			$pinSettting = explode(',', $pinSettting);
-			
-			//var_dump($elements);
-			//die();
 			
 			if (count($pinSettting) > 0) {
 				
@@ -104,7 +107,7 @@
 					
 					if (strlen($key) > 0) {
 						// does it exists ?
-						if (@array_key_exists($key, $elements)) {
+						if (array_key_exists($key, $elements)) {
 							// cache the current element
 							$e = $elements[$key];
 							// set as pinned
@@ -120,6 +123,12 @@
 			}
 		}
 		
+		/**
+		 * 
+		 * Pin a $checked elements into the a setting
+		 * @param string $settingKey
+		 * @param array $checked
+		 */
 		protected function __pin($settingKey, $checked) {			
 			$newPins = '';
 			$pinSettting = extension_edui::getConfigVal($settingKey);
@@ -132,7 +141,7 @@
 				}
 			}
 			
-			$newPins = trim(trim($newPins, ','), ' ');
+			$newPins = trim(trim($newPins, ','));
 			
 			if (strlen($pinSettting) > 0) {
 				$pinSettting .= ',';
@@ -146,6 +155,12 @@
 			Administration::instance()->saveConfig();
 		}
 		
+		/**
+		 * 
+		 * Unpin a $checked elements into the a setting
+		 * @param string $settingKey
+		 * @param array $checked
+		 */
 		protected function __unpin($settingKey, $checked) {
 			$pinSettting = extension_edui::getConfigVal($settingKey);
 			
@@ -157,13 +172,16 @@
 				$pinSet = str_replace(' ', '', trim($pinSet));
 				
 				if (strlen($pinSet) > 0) {
+					// trim elements
 					$ex_pinSettting[$x] = $pinSet;
 					$x++;
 				} else {
+					// removes empty elements
 					array_splice($ex_pinSettting, $x, 1);
 				}
 			}
 
+			// actual unpin
 			foreach($checked as $handle) {
 
 				$idx = array_search($handle, $ex_pinSettting, false);
@@ -175,6 +193,7 @@
 				}
 			}
 			
+			// the a string back
 			$pinSettting = implode(',', $ex_pinSettting);
 			
 			// save
@@ -183,6 +202,11 @@
 			Administration::instance()->saveConfig();
 		}
 		
+		/**
+		 * 
+		 * Creates a TableData cell with the pin button in it.
+		 * @param array $data
+		 */
 		protected function createPinNode($data) {
 			$img = new XMLElement('img');
 			
