@@ -1,19 +1,8 @@
 <?php
 
-	require_once(TOOLKIT . '/class.administrationpage.php');
-	require_once(TOOLKIT . '/class.sectionmanager.php');
-	require_once(TOOLKIT . '/class.eventmanager.php');
+	require_once(EXTENSIONS . '/edui/lib/class.EDUIPage.php');
 
-	require_once(EXTENSIONS . '/edui/lib/class.sorting.php');
-	require_once(EXTENSIONS . '/edui/lib/class.filtering.php');
-	require_once(EXTENSIONS . '/edui/lib/class.pagemanager.php');
-
-	class contentExtensionEduiEvents extends AdministrationPage {
-		public $_errors;
-
-		public function __construct(&$parent){
-			parent::__construct($parent);
-		}
+	class contentExtensionEduiEvents extends EDUIPage {
 
 		public function __viewIndex(){
 			$this->setPageType('table');
@@ -25,8 +14,7 @@
 				Widget::Anchor(__('Create New'), URL . '/symphony/blueprints/events/new/', __('Create a new event'), 'create button')
 			);
 
-			$this->addStylesheetToHead(URL . '/extensions/edui/assets/content.filters.css', 'screen', 80);
-			$this->addScriptToHead(URL . '/extensions/edui/assets/content.filters.js', 80);
+			$this->registerClientRessources();
 
 			$eventManager = new EventManager($this->_Parent);
 			$sectionManager = new SectionManager($this->_Parent);
@@ -34,17 +22,21 @@
 			$events = $eventManager->listAll();
 
 			/* Filtering */
-
 			$filtering = new EventsFiltering();
 			$this->Form->appendChild($filtering->displayFiltersPanel($events));
 
 			/* Sorting */
-
 			$sorting = new Sorting($events, $sort, $order);
+			
+			/* Pinning */
+			$this->pinElements(extension_edui::SETTING_PINNED_EV, &$events);
 
 			/* Columns */
-
 			$columns = array(
+				array(
+					'label' => __('Pin'),
+					'sortable' => false
+				),
 				array(
 					'label' => __('Name'),
 					'sortable' => true
@@ -171,8 +163,10 @@
 
 					$author = Widget::TableData($author);
 					$author->appendChild(Widget::Input('items[' . $e['handle'] . ']', null, 'checkbox'));
+					
+					$pin_ele = $this->createPinNode($e);
 
-					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $author), null);
+					$aTableBody[] = Widget::TableRow(array($pin_ele, $name, $section, $pagelinks, $author), null);
 
 				}
 			}
@@ -193,11 +187,13 @@
 
 			$options = array(
 				array(NULL, false, __('With Selected...')),
+				array('pin', false, __('Pin')),
+				array('unpin', false, __('Unpin')),
 				array('delete', false, __('Delete'), 'confirm'),
 			);
 
 			$pageManager = new PageManager($this->_Parent);
-			$pages = $pageManager->listAll();
+			$pages = $pageManager->getHierarchy();
 
 			$group_link = array('label' => __('Link Page'), 'options' => array());
 			$group_unlink = array('label' => __('Unlink Page'), 'options' => array());
@@ -206,8 +202,8 @@
 			$group_unlink['options'][] = array('unlink-all-pages', false, __('All'));
 
 			foreach($pages as $p) {
-				$group_link['options'][] = array('link-page-' . $p['handle'], false, $p['title']);
-				$group_unlink['options'][] = array('unlink-page-' . $p['handle'], false, $p['title']);
+				$group_link['options'][] = array('link-page-' . $p['id'], false, $p['title']);
+				$group_unlink['options'][] = array('unlink-page-' . $p['id'], false, $p['title']);
 			}
 
 			$options[] = $group_link;
@@ -252,8 +248,18 @@
 
 								if ($canProceed) redirect(Administration::instance()->getCurrentPageURL());
 							}
+							else if ($_POST['with-selected'] == 'pin') {
+								
+								$this->__pin(extension_edui::SETTING_PINNED_EV, $checked);
+								
+							}
+							else if ($_POST['with-selected'] == 'unpin') {
+								
+								$this->__unpin(extension_edui::SETTING_PINNED_EV, $checked);
+								
+							}
 							else if(preg_match('/^(?:un)?link-page-/', $_POST['with-selected'])) {
-								$pageManager = new PageManager();
+								$pageManager = new PageManager($this->_Parent);
 
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									$page = str_replace('unlink-page-', '', $_POST['with-selected']);
@@ -273,20 +279,20 @@
 								redirect(Administration::instance()->getCurrentPageURL());
 							}
 							else if(preg_match('/^(?:un)?link-all-pages$/', $_POST['with-selected'])) {
-								$pageManager = new PageManager();
+								$pageManager = new PageManager($this->_Parent);
 								$pages = $pageManager->listAll();
 
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->unlinkEvent($handle, $page['handle']);
+											$pageManager->unlinkEvent($handle, $page['id']);
 										}
 									}
 								}
 								else {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->linkEvent($handle, $page['handle']);
+											$pageManager->linkEvent($handle, $page['id']);
 										}
 									}
 								}

@@ -1,12 +1,19 @@
 <?php
 
-	require_once(TOOLKIT . '/class.administrationpage.php');
+	require_once(EXTENSIONS . '/edui/lib/class.EDUIPage.php');
 	
-	class contentExtensionEduiUtilities extends AdministrationPage {
-		public $_errors;
-		
-		public function __construct(&$parent){
-			parent::__construct($parent);
+	class contentExtensionEduiUtilities extends EDUIPage {
+
+		private function transformIntoArray($utilities) {
+			$r = array();
+			
+			foreach ($utilities as $k => $u) {
+				$r [$u] = array (
+					'name' => $u
+				);
+			}
+			
+			return $r;
 		}
 		
 		public function __viewIndex(){
@@ -14,11 +21,19 @@
 			$this->setTitle(__('%1$s &ndash; %2$s', array(__('Symphony'), __('Utilities'))));
 			$this->appendSubheading(__('Utilities'), Widget::Anchor(__('Create New'), URL . '/symphony/blueprints/utilities/new/', __('Create a new utility'), 'create button'));
 
+			
+			$this->registerPinClientRessource();
+			
 			$utilities = General::listStructure(UTILITIES, array('xsl'), false, 'asc', UTILITIES);
 			$utilities = $utilities['filelist'];
+			
+			$utilities = $this->transformIntoArray($utilities);
+			
+			/* Pinning */
+			$this->pinElements(extension_edui::SETTING_PINNED_UT, $utilities);
 
 			$aTableHead = array(
-
+				array(__('Pin'), 'col', array('style'=>'width:40px')),
 				array(__('Name'), 'col'),
 			);
 
@@ -38,13 +53,15 @@
 				foreach($utilities as $u) {
 					$name = Widget::TableData(
 						Widget::Anchor(
-							$u,
-							URL . '/symphony/blueprints/utilities/edit/' . str_replace('.xsl', '', $u) . '/')
+							$u['name'],
+							URL . '/symphony/blueprints/utilities/edit/' . str_replace('.xsl', '', $u['name']) . '/')
 					);
 
-					$name->appendChild(Widget::Input('items[' . $u . ']', null, 'checkbox'));
+					$name->appendChild(Widget::Input('items[' . $u['name'] . ']', null, 'checkbox'));
+					
+					$pin_ele = $this->createPinNode($u);
 
-					$aTableBody[] = Widget::TableRow(array($name), null);
+					$aTableBody[] = Widget::TableRow(array($pin_ele, $name), null);
 				}
 			}
 
@@ -62,6 +79,8 @@
 			
 			$options = array(
 				array(NULL, false, __('With Selected...')),
+				array('pin', false, __('Pin')),
+				array('unpin', false, __('Unpin')),
 				array('delete', false, __('Delete'), 'confirm'),
 			);
 
@@ -88,6 +107,17 @@
 
 						if ($canProceed) redirect(Administration::instance()->getCurrentPageURL());
 						break;
+						
+				case 'pin':
+								
+					$this->__pin(extension_edui::SETTING_PINNED_UT, $checked);
+					break;
+
+				case 'unpin':
+								
+					$this->__unpin(extension_edui::SETTING_PINNED_UT, $checked);
+					break;
+								
 				}
 			}
 

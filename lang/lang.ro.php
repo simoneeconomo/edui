@@ -40,5 +40,20 @@
 
 		'Remove filter' => 
 		'Înlătură filtrul',
+	
+		'Define here options for EDUI extension' =>
+		false,
+		
+		'Pinned DS <em>seperated by ,</em>' =>
+		false,
+		
+		' <em>Pinned</em>' =>
+		false,
+		
+		'Pinned Events <em>seperated by ,</em>' =>
+		false,
+		
+		'Pinned Utilities <em>seperated by ,</em>' =>
+		false
 
 	);
