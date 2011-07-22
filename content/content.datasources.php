@@ -201,7 +201,7 @@
 			);
 
 			$pageManager = new PageManager($this->_Parent);
-			$pages = $pageManager->listAll();
+			$pages = $pageManager->flatView();
 
 			$group_link = array('label' => __('Link Page'), 'options' => array());
 			$group_unlink = array('label' => __('Unlink Page'), 'options' => array());
@@ -210,8 +210,8 @@
 			$group_unlink['options'][] = array('unlink-all-pages', false, __('All'));
 
 			foreach($pages as $p) {
-				$group_link['options'][] = array('link-page-' . $p['handle'], false, $p['title']);
-				$group_unlink['options'][] = array('unlink-page-' . $p['handle'], false, $p['title']);
+				$group_link['options'][] = array('link-page-' . $p['id'], false, $p['title']);
+				$group_unlink['options'][] = array('unlink-page-' . $p['id'], false, $p['title']);
 			}
 
 			$options[] = $group_link;
