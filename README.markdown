@@ -20,5 +20,5 @@ _Note_: The latest version can alway be grabbed with `git clone git://github.com
 
  Extension version | Symphony version
  ----------------- | ----------------
- 0.5.2             | 2.2.x
+ 0.6.0             | 2.2.x
  0.5.0             | 2.1.x
