@@ -16,6 +16,8 @@
 			if ($sort == 1)
 				Sorting::sortBySource($order, $data);
 			else if ($sort == 3)
+				Sorting::sortByDate($order, $data);
+			else if ($sort == 4)
 				Sorting::sortByAuthor($order, $data);
 			else
 				Sorting::sortByName($order, $data);
@@ -47,6 +49,19 @@
 			$sort = ($order == 'desc') ? SORT_DESC : SORT_ASC;
 
 			array_multisort($source, $sort, $label, SORT_ASC, $data);
+
+			return $data;
+		}
+
+		public function sortByDate($order, &$data = array()) {
+			foreach ($data as $key => $about) {
+				$author[$key] = $about['release-date'];
+				$label[$key] = $key;
+			}
+
+			$sort = ($order == 'desc') ? SORT_DESC : SORT_ASC;
+
+			array_multisort($author, $sort, $label, SORT_ASC, $data);
 
 			return $data;
 		}

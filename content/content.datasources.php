@@ -58,6 +58,10 @@
 					'sortable' => false
 				),
 				array(
+					'label' => __('Release Date'),
+					'sortable' => true
+				),
+				array(
 					'label' => __('Author'),
 					'sortable' => true
 				)
@@ -164,6 +168,12 @@
 					else
 						$pagelinks = Widget::TableData($pages);
 
+					$datetimeobj = new DateTimeObj();
+					$releasedate = Widget::TableData($datetimeobj->get(
+						__SYM_DATETIME_FORMAT__,
+						strtotime($d['release-date']))
+					);
+
 					$author = $d['author']['name'];
 
 					if (isset($d['author']['website'])) {
@@ -176,7 +186,7 @@
 					$author = Widget::TableData($author);
 					$author->appendChild(Widget::Input('items[' . $d['handle'] . ']', null, 'checkbox'));
 
-					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $author), null);
+					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $releasedate, $author), null);
 
 				}
 			}

@@ -58,6 +58,10 @@
 					'sortable' => false
 				),
 				array(
+					'label' => __('Release Date'),
+					'sortable' => true
+				),
+				array(
 					'label' => __('Author'),
 					'sortable' => true
 				)
@@ -160,6 +164,12 @@
 					else
 						$pagelinks = Widget::TableData($pages);
 
+					$datetimeobj = new DateTimeObj();
+					$releasedate = Widget::TableData($datetimeobj->get(
+						__SYM_DATETIME_FORMAT__,
+						strtotime($d['release-date']))
+					);
+
 					$author = $e['author']['name'];
 
 					if (isset($e['author']['website'])) {
@@ -172,7 +182,7 @@
 					$author = Widget::TableData($author);
 					$author->appendChild(Widget::Input('items[' . $e['handle'] . ']', null, 'checkbox'));
 
-					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $author), null);
+					$aTableBody[] = Widget::TableRow(array($name, $section, $pagelinks, $releasedate, $author), null);
 
 				}
 			}
@@ -206,8 +216,8 @@
 			$group_unlink['options'][] = array('unlink-all-pages', false, __('All'));
 
 			foreach($pages as $p) {
-				$group_link['options'][] = array('link-page-' . $p['handle'], false, $p['title']);
-				$group_unlink['options'][] = array('unlink-page-' . $p['handle'], false, $p['title']);
+				$group_link['options'][] = array('link-page-' . $p['id'], false, $p['title']);
+				$group_unlink['options'][] = array('unlink-page-' . $p['id'], false, $p['title']);
 			}
 
 			$options[] = $group_link;
