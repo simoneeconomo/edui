@@ -293,14 +293,14 @@
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->unlinkDatasource($handle, $page['handle']);
+											$pageManager->unlinkDatasource($handle, $page['id']);
 										}
 									}
 								}
 								else {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->linkDatasource($handle, $page['handle']);
+											$pageManager->linkDatasource($handle, $page['id']);
 										}
 									}
 								}

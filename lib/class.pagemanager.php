@@ -6,8 +6,8 @@
 
 		public function listAll(){
 			if (Multilanguage::isMultiLangual()) {
-				$lang = Multilanguage::getLang();
-				$cols = "`id`, `parent`, `page_lhandles_t_$lang` as `title`, `page_lhandles_h_$lang` as `handle`";
+				$lang = Multilanguage::getLanguage();
+				$cols = "`id`, `parent`, `title`, `handle`, `page_lhandles_t_$lang` as `title_t`, `page_lhandles_h_$lang` as `handle_t`";
 			} else {
 				$cols = "`id`, `parent`, `title`, `handle`";
 			}
@@ -27,12 +27,14 @@
 		}
 
 		private function pageWalkRecursive($parent_id, $pages, &$results) {
+			if (!is_array($pages)) return;
+
 			foreach($pages as $page) {
 				if ($page->parent == $parent_id) {
 					$results[] = array(
 						'id' => $page->id,
-						'title' => $page->title,
-						'handle' => $page->handle,
+						'title' => (empty($page->title_t) ? $page->title : $page->title_t),
+						'handle' => (empty($page->handle_t) ? $page->handle : $page->handle_t),
 						'children' => NULL
 					);
 
@@ -52,6 +54,8 @@
 		}
 		
 		private function buildFlatView($path, $pages, &$results) {
+			if (!is_array($pages)) return;
+
 			foreach($pages as $page) {
 				$label = ($path == NULL) ? $page['title'] : $path . ' / ' . $page['title'];
 

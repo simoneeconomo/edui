@@ -289,14 +289,14 @@
 								if (substr($_POST['with-selected'], 0, 2) == 'un') {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->unlinkEvent($handle, $page['handle']);
+											$pageManager->unlinkEvent($handle, $page['id']);
 										}
 									}
 								}
 								else {
 									foreach($checked as $handle) {
 										foreach($pages as $page) {
-											$pageManager->linkEvent($handle, $page['handle']);
+											$pageManager->linkEvent($handle, $page['id']);
 										}
 									}
 								}
