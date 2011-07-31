@@ -148,7 +148,7 @@
 
 						if(!empty($extension[1])) {
 							$extension = Symphony::$ExtensionManager->about($extension[1]);
-							$section = Widget::TableData(__('Extension:'). ' ' . $extension['name']);
+							$section = Widget::TableData(__('Extension'). ': ' . $extension['name']);
 						}
 						else {
 							$section = Widget::TableData(__('None'), 'inactive');
