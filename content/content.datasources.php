@@ -146,7 +146,17 @@
 								$d['handle']
 							)
 						);
-						$section = Widget::TableData(__('None'), 'inactive');
+
+						// Data Source provided by extension?
+						preg_match('/extensions\/(.*)\/data-sources/', $datasourceManager->__getClassPath($d['handle']), $extension);
+
+						if(!empty($extension[1])) {
+							$extension = Symphony::$ExtensionManager->about($extension[1]);
+							$section = Widget::TableData(__('Extension:'). ' ' . $extension['name']);
+						}
+						else {
+							$section = Widget::TableData(__('None'), 'inactive');
+						}
 					}
 
 					$pages = $filtering->getLinkedPages($d['handle']);

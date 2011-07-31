@@ -142,7 +142,17 @@
 								$e['handle']
 							)
 						);
-						$section = Widget::TableData(__('None'), 'inactive');
+
+						// Event provided by extension?
+						preg_match('/extensions\/(.*)\/events/', $eventManager->__getClassPath($e['handle']), $extension);
+
+						if(!empty($extension[1])) {
+							$extension = Symphony::$ExtensionManager->about($extension[1]);
+							$section = Widget::TableData(__('Extension:'). ' ' . $extension['name']);
+						}
+						else {
+							$section = Widget::TableData(__('None'), 'inactive');
+						}
 					}
 
 					$pages = $filtering->getLinkedPages($e['handle']);
